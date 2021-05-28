@@ -8966,6 +8966,7 @@ class SaladForkReportGenerator {
             report.players = [
                 ...parameters.players.filter(iter => iter.events.length > 0)
             ];
+            // FIXME: Want to sort alphabetically but CML first, doesn't work
             report.outfits = [...parameters.outfits].sort((b, a) => a.tag === 'CML' ? 1 : b.tag === 'CML' ? -1 : a > b ? -1 : b > a ? 1 : 0);
             report.summary.push(this.killStats(parameters));
             report.summary.push(yield this.basesTagged(parameters));
@@ -9008,7 +9009,6 @@ class SaladForkReportGenerator {
             report.leaderboards.Miscellaneous.push(this.teamKills(parameters));
             report.leaderboards.Miscellaneous.push(this.teamKilled(parameters));
             report.leaderboards.Miscellaneous.push(this.lifeExpectancy(parameters));
-            // TODO: Teamkills
             return report;
         });
     }
@@ -9025,7 +9025,6 @@ class SaladForkReportGenerator {
                     name: 'TR Kills',
                     value: allKillEvents.filter(e => isKillOfFaction(e, 'TR')).length
                 },
-                // TODO: verify teamkills work
                 {
                     name: 'VS Kills',
                     value: allKillEvents.filter(e => isKillOfFaction(e, 'VS')).length
