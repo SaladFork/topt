@@ -1,0 +1,3088 @@
+<head>
+    <meta charset="UTF-8">
+
+    <link href="./data/speedrun/PlanetSide2.ttf" rel="font-face">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous">
+    </script>
+
+    <script src="./index.js" defer></script>
+
+    <title>Leaderboard</title>
+
+    <style>
+        .table.table-sm td {
+            padding: 0.25rem;
+        }
+        .list-group.list-group-small .list-group-item {
+            padding: 0.25rem 0.5rem;
+        }
+        .table.table-sm {
+            line-height: 1.2;
+        }
+        .table-striped tbody tr:nth-of-type(even) {
+            background-color: rgba(0, 0, 0, 0.15);
+        }
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: unset !important;
+        }
+
+        [v-cloak] {
+            display: none;
+        }
+
+        .tbl-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .header {
+            margin-left: -15px;
+            margin-right: -15px;
+            padding-left: 15px;
+            font-weight: 400;
+            padding-bottom: 4px;
+            padding-top: 4px;
+            background-color: rgba(0,0,0,0.15);
+        }
+
+        .strike {
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            font-weight: 400;
+        }
+        .strike::before, .strike::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+        }
+        .strike::before {
+            margin-right: 0.25rem;
+            max-width: 1rem;
+        }
+        .strike::after {
+            margin-left: 0.25rem;
+        }
+
+        .ow-score {
+            font-size: 24px !important;
+            white-space: nowrap;
+        }
+
+        .table td {
+            border-top: unset !important;
+        }
+
+        .sr-player {
+            position: absolute;
+            font-family: ps2;
+            border: 3px solid #e8b55c;
+            border-radius: 6px;
+            background-color: #373737;
+        }
+
+        .sr-player-header {
+            font-size: 52pt;
+            color: #e8b55c;
+        }
+
+        .sr-left-align {
+            text-align: start;
+        }
+
+        .sr-right-align {
+            text-align: end;
+        }
+
+        .sr-player-table {
+            margin-bottom: 0;
+            font-size: 24pt;
+            color: #e8b55c !important;
+            width: unset !important;
+        }
+
+        @-moz-keyframes spin {
+            from { -moz-transform: rotate(0deg); }
+            to { -moz-transform: rotate(360deg); }
+        }
+        @-webkit-keyframes spin {
+            from { -webkit-transform: rotate(0deg); }
+            to { -webkit-transform: rotate(360deg); }
+        }
+        @keyframes spin {
+            from {transform:rotate(0deg);}
+            to {transform:rotate(360deg);}
+        }
+
+        @font-face {
+            font-family: ps2;
+            src: url("/data/speedrun/PlanetSide2.ttf");
+        }
+
+        .loading {
+            animation-name: spin;
+            animation-duration: 1000ms;
+            animation-iteration-count: infinite;
+        }
+
+        .scoreboardborder {
+            width: 37.95%;
+            border-left: 4.17vw solid transparent;
+            border-right: 4.17vw solid transparent;
+            border-top: 7.22vh solid rgb(218, 194, 166);
+            position: absolute;
+            left: 31%;
+        }
+
+        .scoreboardbackhalf1 {
+            width: 23vw;
+            height: 6.80vh;
+            background: linear-gradient(rgb(50, 50, 50), black 70%);
+            transform: skewX(-45deg);
+            position: absolute;
+            left: 43.45vw;
+        }
+
+        .scoreboardbackhalf2 {
+            width: 23vw;
+            height: 6.80%;
+            background: linear-gradient(rgb(50, 50, 50), black 70%);
+            transform: skewX(45deg);
+            position: absolute;
+            left: 33.45vw;
+        }
+
+        .gradientNC{
+            width: 17.02vw;
+            height: 11.26vh;
+            background: radial-gradient(ellipse at center, rgba(23, 54, 118, 1), rgba(0, 0, 0, 0) 50%);
+            position: absolute;
+            right: 31.98vw;
+            top: -4.5vh;
+        }
+
+        .gradientVS{
+            width: 17.02vw;
+            height: 11.26vh;
+            background: radial-gradient(ellipse at center, rgba(62, 24, 99, 1), rgba(0, 0, 0, 0) 50%);
+            position: absolute;
+            left: 41.49vw;
+            top: -4.5vh;
+        }
+
+        .gradientTR{
+            width: 17.02vw;
+            height: 11.26vh;
+            background: radial-gradient(ellipse at center, rgba(102, 10, 0, 1), rgba(0, 0, 0, 0) 50%);
+            position: absolute;
+            left: 31.98vw;
+            top: -4.5vh;
+        }
+
+        .ratetextVS{
+        position: absolute;
+        left: 49.78vw;
+        top: 4.55vh;
+        color: white;
+        font-size: 0.91vw;
+        font-family: "Bahnschrift"
+        }
+
+        .ratetextTR{
+        position: absolute;
+        left: 40.40vw;
+        top: 4.55vh;
+        color: white;
+        font-size: 0.91vw;
+        font-family: "Bahnschrift"
+        }
+
+        .ratetextNC{
+        position: absolute;
+        left: 59.15vw;
+        top: 4.55vh;
+        color: white;
+        font-size: 0.91vw;
+        font-family: "Bahnschrift"
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid" id="app" style="height: 100%;" v-cloak>
+
+        <template v-if="settings.darkMode == true">
+            <link rel="stylesheet" href="./dark-theme.min.css">
+        </template>
+
+        <div v-if="view == 'setup' && relic.showUI != false" class="d-flex" style="flex-direction: column;">
+            <div class="w-25 align-self-center pt-5">
+
+                <div style="font-family: ps2">
+                    Tide OPs Tracker: TOPT
+                </div>
+
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            Server
+                        </span>
+                    </div>
+
+                    <select v-model="settings.serverID" class="form-control">
+                        <option value="1">Connery</option>
+                        <option value="17">Emerald</option>
+                        <option value="10">Miller</option>
+                        <option value="13">Cobalt</option>
+                        <option value="40">SolTech</option>
+                        <option value="19">Jaeger</option>
+                    </select>
+                </div>
+
+                <small class="text-muted">
+                    Used to track logins, facility captures and router kills
+                </small>
+
+                <hr/>
+
+                <div>
+                    Enter your Service ID:
+                </div>
+
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            s:
+                        </span>
+                    </div>
+                    <input v-model="settings.serviceToken"
+                        class="form-control"
+                        autofocus
+                        type="text"
+                        @keyup.enter="connect"
+                        placeholder="Service token"
+                    >
+                </div>
+
+                <small class="text-muted d-block">
+                    Do not include the leading s:
+                </small>
+
+                <small class="text-muted">
+                    Don't have one?
+                    <a href="http://census.daybreakgames.com/#devSignup" target="_blank">
+                        Sign up
+                    </a>
+                </small>
+
+                <hr>
+
+                <button @click="connect" type="button" class="btn btn-primary w-100"
+                    :disabled="canConnect == false || connecting == true">
+
+                    <span v-if="connecting == true">
+                        Connecting...
+                    </span>
+
+                    <span v-else>
+                        Connect
+                    </span>
+                </button>
+
+                <small class="text-muted">
+                    You can also hit enter while in the service ID field to connect
+                </small>
+
+                <hr>
+
+                <button v-if="storage.enabled" @click="saveSettings" type="button" class="btn btn-success w-100">
+                    Save and connect
+                </button>
+
+                <span class="text-muted">
+                    Save these settings and load them next time instead of inputing them, saving seconds
+                </span>
+
+                <hr>
+
+                <button @click="view = 'map_setup'" type="button" class="btn btn-secondary w-100">
+                    Setup desolation map
+                </button>
+
+                <hr>
+
+                <div class="btn-group w-100 mt-2">
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#contact-modal">
+                        Info/Contact
+                    </button>
+                    <button type="button" class="btn" :class="[ settings.darkMode == true ? 'btn-dark' : 'btn-light' ]"
+                            @click="settings.darkMode = !settings.darkMode">
+
+                        {{settings.darkMode == false ? 'Use dark mode' : 'Use light mode'}}
+                    </button>
+                </div>
+
+                <hr>
+            </div>
+        </div>
+
+        <div v-else-if="view == 'setup' && relic.showUI == false"></div>
+
+        <div v-else-if="view == 'map_setup'" class="row d-flex" style="flex-direction: column; align-items: center;">
+            <h2>OBS Browser source setup</h2>
+            <div class="col-4">
+                <label class="col-form-label"><b>Zone ID:</b></label>
+                <input v-model="relic.zoneID" type="number" class="form-control" placeholder="Zone ID">
+                <small class="text-muted d-block mb-3">You can get the zone ID from the <code>/ow observematch #</code> command</small>
+
+                <label class="col-form-label"><b>Server:</b></label>
+                <select v-model="relic.serverID" class="form-control mb-3">
+                    <option value="" disabled>Select a server</option>
+                    <option value="1">Connery</option>
+                    <option value="10">Miller</option>
+                    <option value="13">Cobalt</option>
+                    <option value="17">Emerald</option>
+                    <option value="19">Jaeger</option>
+                    <option value="40">SolTech</option>
+                </select>
+
+                <label class="col-form-label"><b>Outfit tags:</b></label>
+                <div class="input-group">
+                    <span class="input-group-text input-group-prepend">VS Tag:</span>
+                    <input v-model="relic.vs_stats.tag" type="text" class="form-control">
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-text input-group-prepend">NC Tag:</span>
+                    <input v-model="relic.nc_stats.tag" type="text" class="form-control">
+                </div>
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text input-group-prepend">TR Tag:</span>
+                    <input v-model="relic.tr_stats.tag" type="text" class="form-control">
+                </div>
+
+                <div>
+                    <label class="col-form-label"><b>Show stats</b></label>
+                    <select v-model="relic.elements.stats" class="form-control">
+                        <option :value="true">Yes</option>
+                        <option :value="false">No</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="col-form-label"><b>Show map</b></label>
+                    <select v-model="relic.elements.map" class="form-control">
+                        <option :value="true">Yes</option>
+                        <option :value="false">No</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="col-form-label"><b>Show scoreboard</b></label>
+                    <select v-model="relic.elements.scoreboard" class="form-control">
+                        <option :value="true">Yes</option>
+                        <option :value="false">No</option>
+                    </select>
+
+                    <small class="text-muted">If using the PSB setup, you'll want to use this one</small>
+                </div>
+
+                <div>
+                    <label class="col-form-label"><b>Show table scoreboard</b></label>
+                    <select v-model="relic.elements.table_scoreboard" class="form-control">
+                        <option :value="true">Yes</option>
+                        <option :value="false">No</option>
+                    </select>
+
+                    <small class="text-muted">If <b>not</b> using the PSB setup, you'll want to turn this on</small>
+                </div>
+
+                <hr>
+
+                <label class="col-form-label"><b>URL:</b></label>
+                <div class="input-group mb-3">
+                    <input id="deso_setup_url" readonly type="text" class="form-control"
+                        :value="desoUrl">
+
+                    <button type="button" @click="copyDesoUrl" class="btn btn-primary">
+                        Copy
+                    </button>
+                </div>
+
+                <button @click="view = 'setup'" type="button" class="btn btn-secondary">
+                    Back
+                </button>
+            </div>
+        </div>
+
+        <div v-else-if="view == 'map'" class="row">
+            <div v-if="relic.warnings.missingZone == true || relic.warnings.missingServer == true" style="position: absolute; top: 50%; left: 50%">
+                <div v-if="relic.warnings.missingZone == true" class="text-danger" style="font-size: xx-large">
+                    No zone ID given
+                </div>
+
+                <div v-if="relic.warnings.missingServer == true" class="text-danger" style="font-size: xx-large">
+                    No server given
+                </div>
+
+                <div class="text-warning">
+                    Hiding after 20 seconds
+                </div>
+            </div>
+
+            <template v-if="relic.elements.scoreboard == true">
+                <div class="scoreboardborder"></div>
+                <div class='scoreboardbackhalf1'></div>
+                <div class='scoreboardbackhalf2'></div>
+                <div class="gradientTR"></div>
+                <div class="gradientNC"></div>
+                <div class="gradientVS"></div>
+                <div class='ratetextTR'>
+                    <!--{{relic.outfits.tr != '' ? relic.outfits.tr : "TR"}}:-->
+                    {{relic.tr_rate}} pt/min
+                </div>
+                <div class='ratetextVS'>
+                    <!--{{relic.outfits.vs != '' ? relic.outfits.vs : "VS"}}:-->
+                    {{relic.vs_rate}} pt/min
+                </div>
+                <div class='ratetextNC'>
+                    <!--{{relic.outfits.nc != '' ? relic.outfits.nc : "NC"}}:-->
+                    {{relic.nc_rate}} pt/min
+                </div>
+            </template>
+
+            <div v-if="relic.elements.stats == true" style="position: absolute; right: 0; top: 20%;">
+                <table class="table table-sm bg-dark">
+                    <tr class="table-secondary">
+                        <th></th>
+                        <th>{{relic.tr_stats.tag}}</th>
+                        <th>{{relic.vs_stats.tag}}</th>
+                        <th>{{relic.nc_stats.tag}}</th>
+                    </tr>
+
+                    <tr>
+                        <td>Players</td>
+                        <td>{{relic.tr_stats.players.length > 48 ? 48 : relic.tr_stats.players.length}}</td>
+                        <td>{{relic.vs_stats.players.length > 48 ? 48 : relic.vs_stats.players.length}}</td>
+                        <td>{{relic.nc_stats.players.length > 48 ? 48 : relic.nc_stats.players.length}}</td>
+                    </tr>
+
+                    <tr v-if="relic.elements.table_scoreboard == true">
+                        <td>Points</td>
+                        <td>{{relic.tr_rate}}</td>
+                        <td>{{relic.vs_rate}}</td>
+                        <td>{{relic.nc_rate}}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Kills</td>
+                        <td>{{relic.tr_stats.kills}}</td>
+                        <td>{{relic.vs_stats.kills}}</td>
+                        <td>{{relic.nc_stats.kills}}</td>
+                    </tr>
+                    <tr>
+                        <td>Deaths</td>
+                        <td>{{relic.tr_stats.deaths}}</td>
+                        <td>{{relic.vs_stats.deaths}}</td>
+                        <td>{{relic.nc_stats.deaths}}</td>
+                    </tr>
+                    <tr>
+                        <td>Revives</td>
+                        <td>{{relic.tr_stats.revives}}</td>
+                        <td>{{relic.vs_stats.revives}}</td>
+                        <td>{{relic.nc_stats.revives}}</td>
+                    </tr>
+
+                    <tr class="table-secondary">
+                        <td colspan="4">Spawns</td>
+                    </tr>
+                    <tr>
+                        <td>Sundy</td>
+                        <td>{{relic.tr_stats.sundySpawns}}</td>
+                        <td>{{relic.vs_stats.sundySpawns}}</td>
+                        <td>{{relic.nc_stats.sundySpawns}}</td>
+                    </tr>
+                    <tr>
+                        <td>Beacon</td>
+                        <td>{{relic.tr_stats.beaconSpawns}}</td>
+                        <td>{{relic.vs_stats.beaconSpawns}}</td>
+                        <td>{{relic.nc_stats.beaconSpawns}}</td>
+                    </tr>
+                    <tr>
+                        <td>Squad</td>
+                        <td>{{relic.tr_stats.squadSpawns}}</td>
+                        <td>{{relic.vs_stats.squadSpawns}}</td>
+                        <td>{{relic.nc_stats.squadSpawns}}</td>
+                    </tr>
+                    <tr>
+                        <td>Router</td>
+                        <td>{{relic.tr_stats.constructionSpawns}}</td>
+                        <td>{{relic.vs_stats.constructionSpawns}}</td>
+                        <td>{{relic.nc_stats.constructionSpawns}}</td>
+                    </tr>
+
+                    <tr class="table-secondary">
+                        <td colspan="4">Vehicle kills</td>
+                    </tr>
+                    <tr>
+                        <td>Armor</td>
+                        <td>{{relic.tr_stats.armorKills}}</td>
+                        <td>{{relic.vs_stats.armorKills}}</td>
+                        <td>{{relic.nc_stats.armorKills}}</td>
+                    </tr>
+                    <tr>
+                        <td>Air</td>
+                        <td>{{relic.tr_stats.airKills}}</td>
+                        <td>{{relic.vs_stats.airKills}}</td>
+                        <td>{{relic.nc_stats.airKills}}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div v-if="relic.elements.map == true" style="position: absolute; bottom: 0; right: 0; width: 562px; height: 469px;">
+                <div style="position: absolute; width: 562px; height: 469px; font-size: 24pt; z-index: 1000">
+                    <span style="position: absolute; top: 95px; left: 175px">A</span>
+                    <span style="position: absolute; top: 95px; left: 372px">B</span>
+                    <span style="position: absolute; top: 220px; left: 460px">C</span>
+                    <span style="position: absolute; top: 395px; left: 375px">D</span>
+                    <span style="position: absolute; top: 395px; left: 175px">E</span>
+                    <span style="position: absolute; top: 225px; left: 93px">F</span>
+                    <span style="position: absolute; top: 203px; left: 214px">G</span>
+                    <span style="position: absolute; top: 203px; left: 311px">H</span>
+                    <span style="position: absolute; top: 289px; left: 270px">I</span>
+                </div>
+                <img src="./data/relics/relic_overlay_base.png" style="position: absolute;">
+                <div v-if="relic.connected == true">
+                    <relic-image :relic-id="relic.A" :map="relic.regions" img="A_"></relic-image>
+                    <relic-image :relic-id="relic.B" :map="relic.regions" img="B_"></relic-image>
+                    <relic-image :relic-id="relic.C" :map="relic.regions" img="C_"></relic-image>
+                    <relic-image :relic-id="relic.D" :map="relic.regions" img="D_"></relic-image>
+                    <relic-image :relic-id="relic.E" :map="relic.regions" img="E_"></relic-image>
+                    <relic-image :relic-id="relic.F" :map="relic.regions" img="F_"></relic-image>
+                    <relic-image :relic-id="relic.G" :map="relic.regions" img="G_"></relic-image>
+                    <relic-image :relic-id="relic.H" :map="relic.regions" img="H_"></relic-image>
+                    <relic-image :relic-id="relic.I" :map="relic.regions" img="I_"></relic-image>
+                    <relic-image :relic-id="relic.N_WG" :map="relic.regions" img="N_WG_"></relic-image>
+                    <relic-image :relic-id="relic.SE_WG" :map="relic.regions" img="SE_WG_"></relic-image>
+                    <relic-image :relic-id="relic.SW_WG" :map="relic.regions" img="SW_WG_"></relic-image>
+                </div>
+            </div>
+        </div>
+
+        <div v-else-if="view == 'realtime' || view == 'killfeed'" class="row" style="height: 100%;">
+            <div class="col-2 border-right" style="height: 100%;">
+                <div style="
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%
+                ">
+
+                    <div class="form-group"> <!-- Add outfit -->
+                        <label>Outfit tag</label>
+                        <div class="input-group">
+                            <input v-model="parameters.outfitTag"
+                                @keyup.enter="addOutfit"
+                                class="form-control"
+                                type="text"
+                                :disabled="loadingOutfit == true"
+                            >
+                            <div class="input-group-append">
+                                <button @click="addOutfit"
+                                    :disabled="parameters.outfitTag.trim().length == 0"
+                                    class="btn btn-primary"
+                                    type="button">
+
+                                    <img v-if="loadingOutfit == true" class="loading" src="/data/loading.png" style="max-height: 1.25rem;">
+
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-0"> <!-- Add person -->
+                        <label>Player name</label>
+                        <div class="input-group">
+                            <input v-model="parameters.playerName"
+                                @keyup.enter="addPlayer"
+                                class="form-control"
+                                type="text"
+                            >
+                            <div class="input-group-append">
+                                <button @click="addPlayer"
+                                    :disabled="parameters.playerName.trim().length == 0"
+                                    class="btn btn-primary"
+                                    type="button">
+                                    Add
+                                </button>
+
+                                <button @click="addOutfitByPlayer"
+                                    :disabled="parameters.playerName.trim().length == 0"
+                                    class="btn btn-secondary"
+                                    type="button">
+                                    Add outfit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr/>
+
+                    <div> <!-- View selection -->
+                        <label class="d-block">View</label>
+
+                        <button class="btn w-100 mb-1" :class="[ view == 'realtime' ? 'btn-success' : 'btn-secondary' ]" @click="view = 'realtime'">
+                            Metrics
+                        </button>
+
+                        <button class="btn w-100" :class="[ view == 'killfeed' ? 'btn-success' : 'btn-secondary' ]" @click="view = 'killfeed'">
+                            Squad tracker
+                        </button>
+                    </div>
+
+                    <hr/>
+
+                    <div v-if="core.tracking.running == false && core.rawData.length == 0"> <!-- Auto start input -->
+                        <input class="form-control" v-model="parameters.autoStartTime"
+                            :class="[parameters.validStartTime == true ? '' : 'is-invalid']"
+                            type="text" pattern="\d{2}:?\d{2}" @blur="validateStartTime"
+                            placeholder="HH:mm (24 hour time)" title="Time to automatically start collecting data. Use 24 hour time">
+
+                        <span v-if="parameters.startTimeLeft">
+                            Starting in {{parameters.startTimeLeft}} seconds
+                        </span>
+                    </div>
+
+                    <div> <!-- Start/Stop buttons -->
+                        <button v-if="core.tracking.running == false && core.rawData.length == 0" @click="setSaveEvents(true)"
+                                class="btn btn-primary w-100 mb-2">
+                            Begin tracking
+                        </button>
+                        <button v-else-if="core.tracking.running == true" @click="setSaveEvents(false)"
+                                class="btn btn-secondary w-100 mb-2">
+                            End tracking
+                        </button>
+                        <button v-else @click="exportData"
+                                class="btn btn-success w-100 mb-2">
+                            Export data
+                        </button>
+                    </div>
+
+                    <hr/>
+
+                    <div class="form-group"> <!-- Data import/export -->
+                        <label>Import/Export data</label>
+
+                        <div class="w-100 mb-1 d-flex">
+                            <label class="btn btn-light btn-outline-dark col-form-label flex-grow-1" for="data-import-input">
+                                <input type="file" id="data-import-input" class="d-none" multiple="true">
+                                Select file
+                            </label>
+                            <button @click="importData" type="button" class="btn btn-success">
+                                Import data
+                            </button>
+                        </div>
+
+                        <div class="btn-group mb-2 w-100">
+                            <button @click="exportData"
+                                class="btn btn-info"
+                                type="button">
+                                Export data
+                            </button>
+
+                            <button @click="exportOpsReport"
+                                class="btn btn-primary"
+                                type="button">
+                                Export report
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div> <!-- Report generation -->
+                        <label class="d-block">Reports</label>
+
+                        <button class="btn btn-success w-100" data-toggle="modal" data-target="#report-modal">
+                            Reports
+                        </button>
+
+                        <button class="btn w-100" :class="[core.desolationFilter == true ? 'btn-primary' : 'btn-secondary']"
+                            @click="core.desolationFilter = !core.desolationFilter">
+
+                            {{core.desolationFilter == true ? 'Turn filter off (currently on)' : 'Turn filter on (currently off)'}}
+                        </button>
+                    </div>
+
+                    <hr/>
+
+                    <div> <!-- Misc info -->
+                        <div class="d-block">
+                            <b>Outfits: </b>
+                            {{core.outfits.map(iter => iter.tag).join(", ")}}
+                        </div>
+
+                        <div class="d-block">
+                            <b>Players: </b>
+                            Tracking {{core.characters.length}} players
+                        </div>
+
+                        <div class="d-block">
+                            <b>Server: </b>
+                            {{settings.serverID | server}}
+                        </div>
+                    </div>
+
+                    <template v-if="settings.debug == true">
+                        <hr/>
+
+                        Debug stuff
+
+                        <button class="btn btn-primary" @click="debugLoadfile('battle')">
+                            Load fight report test
+                        </button>
+
+                        <button class="btn btn-primary" @click="debugLoadfile('ops')">
+                            Load ops report test
+                        </button>
+
+                        <button class="btn btn-primary" @click="debugLoadfile('deso')">
+                            Load deso report test
+                        </button>
+
+                        <button class="btn btn-primary" @click="openLoggerModal()">
+                            Loggers
+                        </button>
+
+                        <div class="btn-group">
+                            <button class="btn btn-success" @click="insertBattleStartMarker()">
+                                Start
+                            </button>
+                            <button class="btn btn-danger" @click="insertBattleEndMarker()">
+                                End
+                            </button>
+                        </div>
+                    </template>
+
+                    <hr/>
+
+                    <div class="w-100 mt-2"> <!-- Settings -->
+                        <span v-if="settings.fromStorage == true">
+                            Loaded saved settings
+                        </span>
+
+                        <button v-if="settings.fromStorage == true" @click="clearSettings" type="button" class="btn btn-warning w-100">
+                            Clear saved settings
+                        </button>
+                    </div>
+
+                    <div class="btn-group w-100 my-2">
+                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#contact-modal">
+                            Info/Contact
+                        </button>
+                        <button type="button" class="btn" :class="[ settings.darkMode == true ? 'btn-dark' : 'btn-light' ]"
+                                @click="settings.darkMode = !settings.darkMode">
+
+                            {{settings.darkMode == false ? 'Use dark mode' : 'Use light mode'}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="view == 'realtime'" class="col-10" style="height: 100%;">
+                <div style="
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%
+                ">
+                    <div class="row align-items-center">
+                        <div class="btn-group w-100 mb-1">
+                            <button @click="setEventType('general')"
+                                class="btn"
+                                :class=" [ settings.eventType == 'general' ? 'btn-primary' : 'btn-light' ] "
+                                type="button">
+                                General
+                            </button>
+                            <button @click="setEventType('versus')"
+                                class="btn"
+                                :class=" [ settings.eventType == 'versus' ? 'btn-primary' : 'btn-light' ] "
+                                type="button">
+                                Versus
+                            </button>
+                            <button @click="setEventType('recon')"
+                                class="btn"
+                                :class=" [ settings.eventType == 'recon' ? 'btn-primary' : 'btn-light' ] "
+                                type="button">
+                                Recon
+                            </button>
+                            <button @click="setEventType('logistics')"
+                                class="btn"
+                                :class=" [ settings.eventType == 'logistics' ? 'btn-primary' : 'btn-light' ] "
+                                type="button">
+                                Logistics
+                            </button>
+                            <button @click="setEventType('objective')"
+                                class="btn"
+                                :class=" [ settings.eventType == 'objective' ? 'btn-primary' : 'btn-light' ] "
+                                type="button">
+                                Objective
+                            </button>
+                            <button @click="setEventType('medic')"
+                                class="btn"
+                                :class=" [ settings.eventType == 'medic' ? 'btn-primary' : 'btn-light' ] "
+                                type="button">
+                                Medic
+                            </button>
+                            <button @click="setEventType('engineer')"
+                                class="btn"
+                                :class=" [ settings.eventType == 'engineer' ? 'btn-primary' : 'btn-light' ] "
+                                type="button">
+                                Engineer
+                            </button>
+                        </div>
+                    </div>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <span @click="sortTable('outfit')">[Outfit]</span>
+                                    <span @click="sortTable('name')">Name</span>
+                                </th>
+
+                                <template v-if="settings.eventType == 'general'">
+                                    <th @click="sortTable('Kill')">Kills</th>
+                                    <th @click="sortTable('Death')">Deaths</th>
+                                    <th @click="sortTable('Revived')">Revived</th>
+                                    <th>K/D</th>
+                                    <th @click="sortTable('score')">Score</th>
+                                    <th>SPM</th>
+                                    <th>Time played</th>
+                                </template>
+
+                                <template v-if="settings.eventType == 'versus'">
+                                    <th @click="sortTable('Kill')">Kills</th>
+                                    <th @click="sortTable('Kill assist')">Assists</th>
+                                    <th>TKs</th>
+                                    <th @click="sortTable('Death')">Deaths</th>
+                                    <th>K/D</th>
+                                    <th>KA/D</th>
+                                    <th>HSR</th>
+                                    <th>KPM</th>
+                                </template>
+
+                                <template v-else-if="settings.eventType == 'recon'">
+                                    <th @click="sortTable('Spot kill')">Spot bonus</th>
+                                    <th @click="sortTable('Motion detect')">Motion spot</th>
+                                    <th @click="sortTable('Radar detect')">Scout radar</th>
+                                </template>
+
+                                <template v-else-if="settings.eventType == 'logistics'">
+                                    <th @click="sortTable('Sundy spawn')">Sundy spawns</th>
+                                    <th @click="sortTable('Squad spawn')">Squad spawns</th>
+                                    <th @click="sortTable('Transport assist')">Transport assists</th>
+                                    <th @click="sortTable('Beacon kill')">Beacon kills</th>
+                                    <th @click="sortTable('Router kill')">Router kills</th>
+                                </template>
+
+                                <template v-else-if="settings.eventType == 'objective'">
+                                    <th @click="sortTable('Capture point')">Capture points</th>
+                                    <th @click="sortTable('Base capture')">Bases captured</th>
+                                    <th @click="sortTable('Base defense')">Bases defended</th>
+                                </template>
+
+                                <template v-else-if="settings.eventType == 'medic'">
+                                    <th @click="sortTable('Kill')">Kills</th>
+                                    <th @click="sortTable('Kill assist')">Assists</th>
+                                    <th @click="sortTable('Death')">Deaths</th>
+                                    <th @click="sortTable('Heal')">Heals</th>
+                                    <th @click="sortTable('Revive')">Revives</th>
+                                    <th @click="sortTable('Shield repair')">Shield</th>
+                                    <th>KR/D</th>
+                                </template>
+
+                                <template v-else-if="settings.eventType == 'engineer'">
+                                    <th @click="sortTable('Resupply')">Resupply</th>
+                                    <th @click="sortTable('MAX repair')">MAX repairs</th>
+                                    <th @click="sortTable('Draw fire')">Draw fire assists</th>
+                                </template>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr v-for="character in display" :key="character.characterID">
+                                <td @click="generatePersonalReport(character.characterID)">
+                                    <a href="#">
+                                        [{{character.outfitTag}}]
+                                        {{character.name}}
+                                    </a>
+                                </td>
+
+                                <template v-if="settings.eventType == 'general'">
+                                    <td>{{character.stats.get("Kill")}}</td>
+                                    <td>{{character.stats.get("Death")}}</td>
+                                    <td>{{character.stats.get("Revived")}}</td>
+                                    <td>{{
+                                        (character.stats.get("Kill")
+                                        / character.stats.get("Death", 1)).toFixed(2)
+                                    }}</td>
+                                    <td>{{character.score}}</td>
+                                    <td>{{
+                                        (character.score
+                                        / (character.secondsOnline / 60)).toFixed(0)
+                                    }}</td>
+                                    <td>{{(character.secondsOnline / 60).toFixed(0)}}m</td>
+                                </template>
+
+                                <template v-if="settings.eventType == 'versus'">
+                                    <td>{{character.stats.get("Kill")}}</td>
+                                    <td>{{character.stats.get("Kill assist")}}</td>
+                                    <td>{{character.stats.get("Teamkilled")}}</td>
+                                    <td>{{character.stats.get("Death")}}</td>
+                                    <td>{{
+                                        (character.stats.get("Kill") / character.stats.get("Death", 1)).toFixed(2)
+                                    }}</td>
+                                    <td>{{
+                                        (
+                                            (character.stats.get("Kill") + character.stats.get("Kill assist"))
+                                            / character.stats.get("Death", 1)
+                                        ).toFixed(2)
+                                    }}</td>
+                                    <td>
+                                        <span v-if="character.stats.get('Kill') == 0">
+                                            --
+                                        </span>
+                                        <span v-else>
+                                            {{
+                                                (character.stats.get("Headshot") / character.stats.get("Kill") * 100).toFixed(2)
+                                            }}%
+                                        </span>
+                                    </td>
+                                    <td>{{
+                                        (character.stats.get("Kill") / (character.secondsOnline / 60)).toFixed(2)
+                                    }}</td>
+                                </template>
+
+                                <template v-else-if="settings.eventType == 'recon'">
+                                    <td>{{character.stats.get("Spot kill")}}</td>
+                                    <td>{{character.stats.get("Motion detect")}}</td>
+                                    <td>{{character.stats.get("Radar detect")}}</td>
+                                </template>
+
+                                <template v-else-if="settings.eventType == 'logistics'">
+                                    <td>{{character.stats.get("Sundy spawn")}}</td>
+                                    <td>{{character.stats.get("Squad spawn")}}</td>
+                                    <td>{{character.stats.get("Transport assist")}}</td>
+                                    <td>{{character.stats.get("Beacon kill")}}</td>
+                                    <td>{{character.stats.get("Router kill")}}</td>
+                                </template>
+
+                                <template v-else-if="settings.eventType == 'objective'">
+                                    <td>{{character.stats.get("Capture point")}}</td>
+                                    <td>{{character.stats.get("Base capture")}}</td>
+                                    <td>{{character.stats.get("Base defense")}}</td>
+                                </template>
+
+                                <template v-else-if="settings.eventType == 'medic'">
+                                    <td>{{character.stats.get("Kill")}}</td>
+                                    <td>{{character.stats.get("Kill assist")}}</td>
+                                    <td>{{character.stats.get("Death")}}</td>
+                                    <td>{{character.stats.get("Heal")}}</td>
+                                    <td>{{character.stats.get("Revive")}}</td>
+                                    <td>{{character.stats.get("Shield repair")}}</td>
+                                    <td>{{
+                                        ((character.stats.get("Kill") + character.stats.get("Revive"))
+                                        / character.stats.get("Death", 1)).toFixed(2)
+                                    }}</td>
+                                </template>
+
+                                <template v-else-if="settings.eventType == 'engineer'">
+                                    <td>{{character.stats.get("Resupply")}}</td>
+                                    <td>{{character.stats.get("MAX repair")}}</td>
+                                    <td>{{character.stats.get("Hardlight cover")}}</td>
+                                </template>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div v-else-if="view == 'killfeed'" class="col-10 h-100">
+                <h2 class="strike">
+                    Squads
+
+                    <button class="btn btn-sm btn-primary ml-2" @click="core.createPermSquad()">
+                        Add named squad
+                    </button>
+
+                    <button class="btn btn-sm btn-danger" @click="removeMostRecentPermSquad">
+                        Delete named squad
+                    </button>
+
+                    <span class="ml-2" style="font-size: 14;">
+                        Press the letters and numbers at the top to move members and merge squads when hovering over them. Use delete to remove someone from a squad
+                    </span>
+                </h2>
+
+                <div class="d-flex flex-column">
+                    <div class="flex-grow-1">
+                        <div class="d-flex flex-column">
+                            <div class="row flex-grow-1">
+                                <div v-for="squad in squad.perm" :key="squad.ID" class="flex-grow-1">
+                                    <h5 v-if="squad.display != null" class="strike mt-0">{{squad.display}}</h5>
+                                    <killfeed-squad :squad="squad" :show-state="true" :debug="core.squad.debug">
+                                    </killfeed-squad>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="row flex-grow-1">
+                                <div class="col-12">
+                                    Possible squads
+                                </div>
+
+                                <div class="col-12">
+                                    <template v-for="squad in squad.guesses">
+                                        <killfeed-squad :squad="squad" style="display: inline-flex;" :debug="core.squad.debug">
+                                        </killfeed-squad>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-else-if="view == 'ops'" class="row">
+            <div class="col-12"> <!-- Header -->
+                <div class="d-flex align-items-center mb-2">
+                    <img :src="showFrog == false ? '/data/logo.png' : '/data/frog.png'" class="mr-1" style="max-width: 128px; max-height: 128px; border-radius: 30%;" title="Tide logo">
+                    <div class="d-flex flex-row flex-grow-1">
+                        <div class="flex-grow-1">
+                            <h2>Tide OP Tracker (TOPT)</h2>
+                            <h5 class="text-muted">OP session report</h5>
+                            <h5>
+                                <a href="#">https://github.com/Varunda/topt/</a>
+                            </h5>
+                        </div>
+
+                        <div class="flex-grow-1">
+                            <div><b>Start:</b> {{outfitReport.tracking.startTime | moment}}</div>
+                            <div><b>End:</b> {{outfitReport.tracking.endTime | moment}}</div>
+                            <div><b>Duration:</b> {{outfitReport.tracking.startTime | between(outfitReport.tracking.endTime)}}</div>
+                            <div><b>Players:</b> {{outfitReport.players.length}}</div>
+                        </div>
+
+                        <div>
+                            <button @click="view = 'realtime'" type="button" class="btn btn-secondary float-right">
+                                &times;
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12"> <!-- General metrics -->
+                <h3 class="strike mt-0">Metrics</h3>
+                <table class="table table-sm table-striped">
+                    <thead>
+                        <tr class="table-secondary">
+                            <td><b>Metric</b></td>
+                            <td><b>Total</b></td>
+                            <td><b>Average</b></td>
+                            <td><b>Infil</b></td>
+                            <td><b>LA</b></td>
+                            <td><b>Medic</b></td>
+                            <td><b>Eng</b></td>
+                            <td><b>Heavy</b></td>
+                            <td><b>MAX</b></td>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td><b>Players</b></td>
+                            <td>
+                                {{outfitReport.players.length}}
+                            </td>
+                            <td>
+                                --
+                            </td>
+                            <td>
+                                {{outfitReport.players.filter(iter => iter.mostPlayed.name == 'Infiltrator').length}}
+                            </td>
+                            <td>
+                                {{outfitReport.players.filter(iter => iter.mostPlayed.name == 'Light Assault').length}}
+                            </td>
+                            <td>
+                                {{outfitReport.players.filter(iter => iter.mostPlayed.name == 'Medic').length}}
+                            </td>
+                            <td>
+                                {{outfitReport.players.filter(iter => iter.mostPlayed.name == 'Engineer').length}}
+                            </td>
+                            <td>
+                                {{outfitReport.players.filter(iter => iter.mostPlayed.name == 'Heavy').length}}
+                            </td>
+                            <td>
+                                {{outfitReport.players.filter(iter => iter.mostPlayed.name == 'MAX').length}}
+                            </td>
+                        </tr>
+                        <tr v-for="stat in ['Kill', 'Death']">
+                            <template v-if="outfitReport.classStats.get(stat) != undefined">
+                                <td><b>{{stat}}</b></td>
+                                <td>{{outfitReport.classStats.get(stat).total}}</td>
+                                <td>{{(outfitReport.classStats.get(stat).total / outfitReport.players.length).toFixed(2)}}</td>
+                                <td>{{outfitReport.classStats.get(stat).infil}}</td>
+                                <td>{{outfitReport.classStats.get(stat).lightAssault}}</td>
+                                <td>{{outfitReport.classStats.get(stat).medic}}</td>
+                                <td>{{outfitReport.classStats.get(stat).engineer}}</td>
+                                <td>{{outfitReport.classStats.get(stat).heavy}}</td>
+                                <td>{{outfitReport.classStats.get(stat).max}}</td>
+                            </template>
+                        </tr>
+                        <tr>
+                            <template v-if="outfitReport.classStats.get('Kill') != undefined && outfitReport.classStats.get('Death') != undefined">
+                                <td><b>K/D</b></td>
+                                <td>--</td>
+                                <td>{{(outfitReport.classStats.get('Kill').total / outfitReport.classStats.get('Death').total).toFixed(2)}}</td>
+                                <td>{{(outfitReport.classStats.get('Kill').infil / outfitReport.classStats.get('Death').infil).toFixed(2)}}</td>
+                                <td>{{(outfitReport.classStats.get('Kill').lightAssault / outfitReport.classStats.get('Death').lightAssault).toFixed(2)}}</td>
+                                <td>{{(outfitReport.classStats.get('Kill').medic / outfitReport.classStats.get('Death').medic).toFixed(2)}}</td>
+                                <td>{{(outfitReport.classStats.get('Kill').engineer/ outfitReport.classStats.get('Death').engineer).toFixed(2)}}</td>
+                                <td>{{(outfitReport.classStats.get('Kill').heavy / outfitReport.classStats.get('Death').heavy).toFixed(2)}}</td>
+                                <td>{{(outfitReport.classStats.get('Kill').max / outfitReport.classStats.get('Death').max).toFixed(2)}}</td>
+                            </template>
+                        </tr>
+                        <tr>
+                            <template v-if="outfitReport.classStats.get('Headshot') != undefined">
+                                <td><b>Headshot</b></td>
+                                <td>
+                                    {{outfitReport.classStats.get('Headshot').total}}
+                                    ({{(outfitReport.classStats.get('Headshot').total / outfitReport.classStats.get('Kill').total * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{(outfitReport.classStats.get('Headshot').total / outfitReport.players.length).toFixed(2)}}
+                                </td>
+                                <td>
+                                    {{outfitReport.classStats.get('Headshot').infil}}
+                                    ({{(outfitReport.classStats.get('Headshot').infil / outfitReport.classStats.get('Kill').infil * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{outfitReport.classStats.get('Headshot').lightAssault}}
+                                    ({{(outfitReport.classStats.get('Headshot').lightAssault / outfitReport.classStats.get('Kill').lightAssault * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{outfitReport.classStats.get('Headshot').medic}}
+                                    ({{(outfitReport.classStats.get('Headshot').medic / outfitReport.classStats.get('Kill').medic * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{outfitReport.classStats.get('Headshot').engineer}}
+                                    ({{(outfitReport.classStats.get('Headshot').engineer / outfitReport.classStats.get('Kill').engineer * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{outfitReport.classStats.get('Headshot').heavy}}
+                                    ({{(outfitReport.classStats.get('Headshot').heavy / outfitReport.classStats.get('Kill').heavy * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{outfitReport.classStats.get('Headshot').max}}
+                                    ({{(outfitReport.classStats.get('Headshot').max / outfitReport.classStats.get('Kill').max * 100).toFixed(2)}}%)
+                                </td>
+                            </template>
+                        </tr>
+
+                        <tr v-for="stat in ['Kill assist', 'Revived', 'Transport assist', 'Beacon kill', 'Control point attack', 'Control point defend']">
+                            <template v-if="outfitReport.classStats.get(stat) != undefined">
+                                <td><b>{{stat}}</b></td>
+                                <td>{{outfitReport.classStats.get(stat).total}}</td>
+                                <td>{{(outfitReport.classStats.get(stat).total / outfitReport.players.length).toFixed(2)}}</td>
+                                <td>{{outfitReport.classStats.get(stat).infil}}</td>
+                                <td>{{outfitReport.classStats.get(stat).lightAssault}}</td>
+                                <td>{{outfitReport.classStats.get(stat).medic}}</td>
+                                <td>{{outfitReport.classStats.get(stat).engineer}}</td>
+                                <td>{{outfitReport.classStats.get(stat).heavy}}</td>
+                                <td>{{outfitReport.classStats.get(stat).max}}</td>
+                            </template>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-12"> <!-- Class playtime -->
+                <h2 class="strike">Class playtime</h2>
+                <div class="row">
+                    <div class="col-6">
+                        <breakdown-chart :src="outfitReport.classPlaytimes"
+                            :show-all="true" :clipped-amount="8">
+                        </breakdown-chart>
+                    </div>
+
+                    <div class="col-6">
+                        <breakdown :data="outfitReport.classPlaytimes" :show-all="true"
+                            left-title="Class" right-title="Hours:Minutes:Seconds"
+                            :show-percent="true" :clipped-amount="10" :show-total="true">
+                        </breakdown>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12"> <!-- K/D trend -->
+                <h2 class="strike">KPM boxplot</h2>
+                <div class="row">
+                    <div class="col-2 pr-0">
+                        <h4>Average</h4>
+                        <breakdown-box :src="outfitReport.kpmBoxPlot.total"></breakdown-box>
+                    </div>
+                    <div class="col-2 px-0">
+                        <h4>Infiltrator</h4>
+                        <breakdown-box :src="outfitReport.kpmBoxPlot.infil"></breakdown-box>
+                    </div>
+                    <div class="col-2 px-0">
+                        <h4>Light assault</h4>
+                        <breakdown-box :src="outfitReport.kpmBoxPlot.lightAssault"></breakdown-box>
+                    </div>
+                    <div class="col-2 px-0">
+                        <h4>Medic</h4>
+                        <breakdown-box :src="outfitReport.kpmBoxPlot.medic"></breakdown-box>
+                    </div>
+                    <div class="col-2 px-0">
+                        <h4>Engineer</h4>
+                        <breakdown-box :src="outfitReport.kpmBoxPlot.engineer"></breakdown-box>
+                    </div>
+                    <div class="col-2 pl-0">
+                        <h4>Heavy</h4>
+                        <breakdown-box :src="outfitReport.kpmBoxPlot.heavy"></breakdown-box>
+                    </div>
+                </div>
+
+                <h2 class="strike">KD boxplot</h2>
+                <div class="row">
+                    <div class="col-2 pr-0">
+                        <h4>Average</h4>
+                        <breakdown-box :src="outfitReport.kdBoxPlot.total"></breakdown-box>
+                    </div>
+                    <div class="col-2 px-0">
+                        <h4>Infiltrator</h4>
+                        <breakdown-box :src="outfitReport.kdBoxPlot.infil"></breakdown-box>
+                    </div>
+                    <div class="col-2 px-0">
+                        <h4>Light assault</h4>
+                        <breakdown-box :src="outfitReport.kdBoxPlot.lightAssault"></breakdown-box>
+                    </div>
+                    <div class="col-2 px-0">
+                        <h4>Medic</h4>
+                        <breakdown-box :src="outfitReport.kdBoxPlot.medic"></breakdown-box>
+                    </div>
+                    <div class="col-2 px-0">
+                        <h4>Engineer</h4>
+                        <breakdown-box :src="outfitReport.kdBoxPlot.engineer"></breakdown-box>
+                    </div>
+                    <div class="col-2 pl-0">
+                        <h4>Heavy</h4>
+                        <breakdown-box :src="outfitReport.kdBoxPlot.heavy"></breakdown-box>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-12"> <!-- Faction stats -->
+                <h2 class="strike">Factions</h2>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="row">
+                            <div class="col-12">
+                                <h4 class="strike">Faction kills</h4>
+                            </div>
+
+                            <div class="col-6">
+                                <breakdown-chart :src="outfitReport.factionKillBreakdown"
+                                    :show-all="false" :clipped-amount="8">
+                                </breakdown-chart>
+                            </div>
+
+                            <div class="col-6">
+                                <breakdown :data="outfitReport.factionKillBreakdown" :show-all="true"
+                                    left-title="Kills" right-title="Amount"
+                                    :show-percent="true" :clipped-amount="10" :show-total="true">
+                                </breakdown>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="row">
+                            <div class="col-12">
+                                <h4 class="strike">Faction deaths</h4>
+                            </div>
+
+                            <div class="col-6">
+                                <breakdown-chart :src="outfitReport.factionDeathBreakdown"
+                                    :show-all="false" :clipped-amount="8">
+                                </breakdown-chart>
+                            </div>
+
+                            <div class="col-6">
+                                <breakdown :data="outfitReport.factionDeathBreakdown" :show-all="true"
+                                    left-title="Deaths" right-title="Amount"
+                                    :show-percent="true" :clipped-amount="10" :show-total="true">
+                                </breakdown>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12"> <!-- Continent kills//deaths  -->
+                <h2 class="strike">Continents</h2>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="row">
+                            <div class="col-12">
+                                <h4 class="strike">Continent kills</h4>
+                            </div>
+
+                            <div class="col-6">
+                                <breakdown-chart :src="outfitReport.continentKillBreakdown"
+                                    :show-all="false" :clipped-amount="8">
+                                </breakdown-chart>
+                            </div>
+
+                            <div class="col-6">
+                                <breakdown :data="outfitReport.continentKillBreakdown" :show-all="true"
+                                    left-title="Kills" right-title="Amount"
+                                    :show-percent="true" :clipped-amount="10" :show-total="true">
+                                </breakdown>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="row">
+                            <div class="col-12">
+                                <h4 class="strike">Continent deaths</h4>
+                            </div>
+
+                            <div class="col-6">
+                                <breakdown-chart :src="outfitReport.continentDeathBreakdown"
+                                    :show-all="false" :clipped-amount="8">
+                                </breakdown-chart>
+                            </div>
+
+                            <div class="col-6">
+                                <breakdown :data="outfitReport.continentDeathBreakdown" :show-all="true"
+                                    left-title="Deaths" right-title="Amount"
+                                    :show-percent="true" :clipped-amount="10" :show-total="true">
+                                </breakdown>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12"> <!-- Score breakdown -->
+                <h3 class="strike mt-0">
+                    Total score -
+                    {{outfitReport.score.toLocaleString()}}
+                </h3>
+
+                <table class="table table-sm table-striped">
+                    <thead>
+                        <tr class="table-secondary">
+                            <th>Source</th>
+                            <th>Score</th>
+                            <th>Percent</th>
+                            <th>Ticks</th>
+                            <th>Ticks/Min</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr v-for="exp in outfitReport.scoreBreakdown">
+                            <td>{{exp.name}}</td>
+                            <td>{{exp.score.toLocaleString()}}</td>
+                            <td>{{(exp.score / outfitReport.score * 100).toFixed(0)}}%</td>
+                            <td>{{exp.amount.toLocaleString()}}</td>
+                            <td>
+                                {{(exp.amount / (((outfitReport.tracking.endTime - outfitReport.tracking.startTime) / 60000))).toFixed(2)}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-12"> <!-- Per minute stats -->
+                <h2 class="strike">Metric trends</h2>
+
+                <h4 class="strike">KPM per 5 minute blocks</h4>
+                <breakdown-interval :src="outfitReport.overtimePer5.kpm"
+                    :show-x-axis="false" :show-labels="false">
+                </breakdown-interval>
+
+                <h4 class="strike">KPM per 1 minute blocks</h4>
+                <breakdown-interval :src="outfitReport.overtimePer1.kpm"
+                    :show-x-axis="false" :show-labels="false">
+                </breakdown-interval>
+
+                <h4 class="strike">K/D per 5 minute blocks</h4>
+                <breakdown-interval :src="outfitReport.overtimePer5.kd"
+                    :show-labels="false">
+                </breakdown-interval>
+
+                <h4 class="strike">K/D per 1 minute blocks</h4>
+                <breakdown-interval :src="outfitReport.overtimePer1.kd"
+                    :show-labels="false">
+                </breakdown-interval>
+
+                <h4 class="strike">RPM per 5 minute blocks</h4>
+                <breakdown-interval :src="outfitReport.overtimePer5.rpm"
+                    :show-labels="false">
+                </breakdown-interval>
+
+                <h4 class="strike">RPM per 1 minute blocks</h4>
+                <breakdown-interval :src="outfitReport.overtimePer1.rpm"
+                    :show-labels="false">
+                </breakdown-interval>
+
+                <h4 class="strike">K/D per kill & deaths</h4>
+                <breakdown-interval :src="outfitReport.perUpdate.kd"
+                    :show-x-axis="false" :show-labels="false">
+                </breakdown-interval>
+            </div>
+
+            <!--
+            <div class="col-12"> <!-\- Time spend unrevived -\->
+                <h2 class="strike">Revive metrics</h2>
+
+                <div class="row">
+                    <div class="col-6">
+                        <h4 class="strike">Probability when you are revived the percent chance you'll live that many seconds</h4>
+                        <breakdown-bar :src="outfitReport.kmLifeExpectance"
+                            :show-x-axis="true">
+                        </breakdown-bar>
+                        <span class="text-muted">
+                            Each drop corresponds to a probabilty someone revived will die
+                        </span>
+                    </div>
+
+                    <div class="col-6">
+                        <h4 class="strike">Probablity of being unrevived after n seconds</h4>
+                        <breakdown-bar :src="outfitReport.kmTimeDead"
+                            :show-x-axis="true">
+                        </breakdown-bar>
+                        <span class="text-muted">
+                            Percent chance that after n seconds an individual has yet to be revived.
+                            Does not include deaths that were not revived
+                        </span>
+                    </div>
+                </div>
+
+                <h4 class="strike">Life expectance after being revived</h4>
+                <breakdown-bar :src="outfitReport.revivedLifeExpectance">
+                </breakdown-bar>
+                <span class="text-muted">
+                    This only includes revives with deaths that occur within 20 seconds.
+                    Revives and then the revived person lives longer than 20 seconds is not counted
+                </span>
+
+                <h4 class="strike">Seconds between death and being revived</h4>
+                <breakdown-bar :src="outfitReport.timeUnrevived">
+                </breakdown-bar>
+                <span class="text-muted">
+                    This includes the time it takes for a revive to be completed,
+                    making it possible to be longer than 30 seconds,
+                    as the revive timer stops while being revived
+                </text>
+            </div>
+            -->
+
+            <div class="col-12"> <!-- Weapon breakdown -->
+                <h2 class="strike">Weapons</h2>
+
+                <h4 class="strike">Weapon kills</h4>
+                <div class="row">
+                    <div class="col-3">
+                        <breakdown :data="outfitReport.weaponKillBreakdown" :show-all="false"
+                            left-title="Weapon kills" right-title="Amount"
+                            :show-percent="true" :clipped-amount="10" :show-total="true">
+                        </breakdown>
+                    </div>
+                    <div class="col-3">
+                        <breakdown-chart :src="outfitReport.weaponKillBreakdown"
+                            :show-all="false" :clipped-amount="8">
+                        </breakdown-chart>
+                    </div>
+
+                    <div class="col-3">
+                        <breakdown :data="outfitReport.weaponTypeKillBreakdown" :show-all="false"
+                            left-title="Weapon type kills" right-title="Amount"
+                            :show-percent="true" :clipped-amount="10" :show-total="true">
+                        </breakdown>
+                    </div>
+                    <div class="col-3">
+                        <breakdown-chart :src="outfitReport.weaponTypeKillBreakdown"
+                            :show-all="false" :clipped-amount="8">
+                        </breakdown-chart>
+                    </div>
+                </div>
+
+                <h4 class="strike">Weapon type death breakdown</h4>
+                <table class="table table-striped table-sm">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th>Weapon type</th>
+                            <th>Total deaths</th>
+                            <th>Revived deaths</th>
+                            <th>% revived</th>
+                            <th>Unrevived deaths</th>
+                            <th>% unrevived</th>
+                            <th>Headshots</th>
+                            <th>Most used</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr v-for="breakdown in outfitReport.weaponTypeDeathBreakdown">
+                            <td><b>{{breakdown.type}}</b></td>
+                            <td>
+                                {{breakdown.deaths}}
+                                ({{(breakdown.deaths / (outfitReport.deathAllBreakdown.total) * 100).toFixed(2)}}%)
+                            </td>
+                            <td>
+                                {{breakdown.revived}}
+                            </td>
+                            <td>
+                                {{(breakdown.revived / breakdown.deaths * 100).toFixed(2)}}%
+                            </td>
+                            <td>
+                                {{breakdown.unrevived}}
+                            </td>
+                            <td>
+                                {{(breakdown.unrevived / breakdown.deaths * 100).toFixed(2)}}%
+                            </td>
+                            <td>
+                                {{breakdown.headshots}}
+                                ({{(breakdown.headshots / breakdown.deaths * 100).toFixed(2)}}%)
+                            </td>
+                            <td>
+                                {{breakdown.mostUsed}} - {{breakdown.mostUsedDeaths}}
+                                ({{(breakdown.mostUsedDeaths / breakdown.deaths * 100).toFixed(2)}}%)
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <small class="text-muted">
+                    A weapon type is only included if it accounts for more than 0.25% of deaths
+                </small>
+
+                <h4 class="strike">All weapon deaths</h4>
+                <div class="row">
+                    <div class="col-3">
+                        <breakdown :data="outfitReport.deathAllBreakdown" :show-all="false"
+                            left-title="Weapon deaths" right-title="Amount"
+                            :clipped-amount="5" :show-total="true">
+                        </breakdown>
+                    </div>
+                    <div class="col-3">
+                        <breakdown-chart :src="outfitReport.deathAllBreakdown"
+                            :show-all="false" :clipped-amount="8">
+                        </breakdown-chart>
+                    </div>
+                    <div class="col-3">
+                        <breakdown :data="outfitReport.deathAllTypeBreakdown" :show-all="false"
+                            left-title="Weapon type deaths" right-title="Amount"
+                            :show-percent="true" :clipped-amount="5" :show-total="true">
+                        </breakdown>
+                    </div>
+                    <div class="col-3">
+                        <breakdown-chart :src="outfitReport.deathAllTypeBreakdown"
+                            :show-all="false" :clipped-amount="8">
+                        </breakdown-chart>
+                    </div>
+                </div>
+
+                <h4 class="strike">Teamkill weapons</h4>
+                <div class="row">
+                    <div class="col-3">
+                        <breakdown :data="outfitReport.teamkillBreakdown" :show-all="false"
+                            left-title="Teamkill weapons" right-title="Amount"
+                            :clipped-amount="5" :show-total="true">
+                        </breakdown>
+                    </div>
+                    <div class="col-3">
+                        <breakdown-chart :src="outfitReport.teamkillBreakdown"
+                            :show-all="false" :clipped-amount="8">
+                        </breakdown-chart>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12"> <!-- Facility captures -->
+                <h2 class="strike">Facility captures</h2>
+
+                <table class="table table-sm table-striped">
+                    <thead>
+                        <tr class="table-secondary">
+                            <th>Facility</th>
+                            <th>Timestamp</th>
+                            <th>Previous faction</th>
+                            <th>Participants</th>
+                            <th>Outfits</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr v-for="cap in outfitReport.baseCaptures">
+                            <td>{{cap.name}}</td>
+                            <td>{{cap.timestamp | moment}}</td>
+                            <td>{{cap.faction | faction}}</td>
+                            <td>{{cap.outfits.total}}</td>
+                            <td>
+                                <breakdown-chart :src="cap.outfits" style="max-height: 200px; max-width: 60%;"
+                                    :clipped-amount="5">
+                                </breakdown-chart>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-12"> <!-- Outfit KD -->
+                <h2 class="strike">Outfit versus K/D</h2>
+                <h5>
+                    <small class="text-muted">Outfits are included if they have > 1% of kills or deaths</small>
+                </h5>
+
+                <table class="table table-sm table-striped mb-1">
+                    <thead>
+                        <tr class="table-secondary">
+                            <td><b>Outfit</b></td>
+                            <td><b>Players</b></td>
+                            <td><b>Kills</b></td>
+                            <td><b>Deaths</b></td>
+                            <td><b>K/D</b></td>
+                            <td><b>Revived</b></td>
+                            <td><b>Infil</b></td>
+                            <td><b>LA</b></td>
+                            <td><b>Medic</b></td>
+                            <td><b>Eng</b></td>
+                            <td><b>Heavy</b></td>
+                            <td><b>MAX</b></td>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr v-for="breakdown in outfitReport.outfitVersusBreakdown">
+                            <td>[{{breakdown.tag}}]
+                                {{breakdown.name}} -
+                                {{
+                                    breakdown.tag == "" ? "" :
+                                    breakdown.faction == "1" ? "VS" :
+                                    breakdown.faction == "2" ? "NC" :
+                                    breakdown.faction == "3" ? "TR" :
+                                    breakdown.faction == "4" ? "NS" :
+                                    `Unknown ${breakdown.faction}`
+                                }}
+                            </td>
+                            <td>{{breakdown.players}}</td>
+                            <td>
+                                {{breakdown.kills}}
+                                ({{(breakdown.kills / outfitReport.stats.get("Kill") * 100).toFixed(2)}}%)
+                            </td>
+                            <td>
+                                {{breakdown.deaths}}
+                                ({{(breakdown.deaths / (outfitReport.stats.get("Death") || 1) * 100).toFixed(2)}}%)
+                            </td>
+                            <td>
+                                {{(breakdown.kills / (breakdown.deaths || 1)).toFixed(2)}}
+                            </td>
+                            <td>
+                                {{breakdown.revived}}
+                                ({{(breakdown.revived / ((breakdown.deaths || 1) + (breakdown.revived || 1)) * 100).toFixed(2)}}%)
+                            </td>
+                            <td>
+                                {{breakdown.classKills.infil}} / {{breakdown.classDeaths.infil}}
+                                - {{(breakdown.classKills.infil / (breakdown.classDeaths.infil || 1)).toFixed(2)}}
+                            </td>
+                            <td>
+                                {{breakdown.classKills.lightAssault}} / {{breakdown.classDeaths.lightAssault}}
+                                - {{(breakdown.classKills.lightAssault / (breakdown.classDeaths.lightAssault || 1)).toFixed(2)}}
+                            </td>
+                            <td>
+                                {{breakdown.classKills.medic}} / {{breakdown.classDeaths.medic}}
+                                - {{(breakdown.classKills.medic / (breakdown.classDeaths.medic || 1)).toFixed(2)}}
+                            </td>
+                            <td>
+                                {{breakdown.classKills.engineer}} / {{breakdown.classDeaths.engineer}}
+                                - {{(breakdown.classKills.engineer / (breakdown.classDeaths.engineer || 1)).toFixed(2)}}
+                            </td>
+                            <td>
+                                {{breakdown.classKills.heavy}} / {{breakdown.classDeaths.heavy}}
+                                - {{(breakdown.classKills.heavy / (breakdown.classDeaths.heavy || 1)).toFixed(2)}}
+                            </td>
+                            <td>
+                                {{breakdown.classKills.max}} / {{breakdown.classDeaths.max}}
+                                - {{(breakdown.classKills.max / (breakdown.classDeaths.max || 1)).toFixed(2)}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <small class="text-muted">
+                    Revived refers to dying and being revived, deaths refer to dying and respawning. The percent revived indicates the amount of deaths that were revived
+                </small>
+            </div>
+
+            <div v-if="opsReportSettings.showSquadStats == true" class="col-12"> <!-- Squad stats -->
+                <h2 class="strike">Squad stats</h2>
+                <span class="text-muted">
+                    This requires prior setup to be functional. If you find any errors please export the data and send it to Varunda
+                </span>
+
+                <table class="table">
+                    <tr>
+                        <th>Squad</th>
+                        <th># Members</th>
+                        <th>Kills</th>
+                        <th>Deaths</th>
+                        <th>Avg K/D</th>
+                        <th>Revives</th>
+                        <th>Heals</th>
+                        <th>Resupplies</th>
+                        <th>Repairs</th>
+                        <th>V. Kills</th>
+                    </tr>
+
+                    <tr v-for="squad in outfitReport.squadStats.data">
+                        <td>{{squad.name}}</td>
+                        <td>{{squad.members.length}}</td>
+                        <td>{{squad.kills}} ({{(squad.kills / outfitReport.squadStats.all.kills * 100).toFixed(2)}}%)</td>
+                        <td>{{squad.deaths}}</td>
+                        <td>{{(squad.kills / (squad.deaths || 1)).toFixed(2)}}</td>
+                        <td>{{squad.revives}} ({{(squad.revives / outfitReport.squadStats.all.revives * 100).toFixed(2)}}%)</td>
+                        <td>{{squad.heals}} ({{(squad.heals / outfitReport.squadStats.all.heals * 100).toFixed(2)}}%)</td>
+                        <td>{{squad.resupplies}} ({{(squad.resupplies / outfitReport.squadStats.all.resupplies * 100).toFixed(2)}}%)</td>
+                        <td>{{squad.repairs}} ({{(squad.repairs / outfitReport.squadStats.all.repairs * 100).toFixed(2)}}%)</td>
+                        <td>{{squad.vKills}} ({{(squad.vKills / outfitReport.squadStats.all.vKills * 100).toFixed(2)}}%)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="col-12">
+                <h2 class="strike">Class breakdown</h2>
+            </div>
+            <div v-for="clazz in classIterator" class="col-12 mb-5"> <!-- Class breakdown -->
+                <h3 class="strike mt-0">{{clazz.title}}</h3>
+
+                <div v-if="outfitReport.players.filter(iter => iter.mostPlayed.name == clazz.title).length > 1">
+                    <h5>
+                        Versus class K/D
+                        <small class="text-muted">How many kills and deaths this class had against each class</small>
+                    </h5>
+                    <table class="table table-sm table-striped">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th></th>
+                                <th>Infil</th>
+                                <th>LA</th>
+                                <th>Medic</th>
+                                <th>Heavy</th>
+                                <th>Engineer</th>
+                                <th>MAX</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td><b>Kills</b></td>
+                                <td>{{outfitReport.classKds[clazz.name].infil.kills}}</td>
+                                <td>{{outfitReport.classKds[clazz.name].lightAssault.kills}}</td>
+                                <td>{{outfitReport.classKds[clazz.name].medic.kills}}</td>
+                                <td>{{outfitReport.classKds[clazz.name].engineer.kills}}</td>
+                                <td>{{outfitReport.classKds[clazz.name].heavy.kills}}</td>
+                                <td>{{outfitReport.classKds[clazz.name].max.kills}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Deaths</b></td>
+                                <td>{{outfitReport.classKds[clazz.name].infil.deaths}}</td>
+                                <td>{{outfitReport.classKds[clazz.name].lightAssault.deaths}}</td>
+                                <td>{{outfitReport.classKds[clazz.name].medic.deaths}}</td>
+                                <td>{{outfitReport.classKds[clazz.name].engineer.deaths}}</td>
+                                <td>{{outfitReport.classKds[clazz.name].heavy.deaths}}</td>
+                                <td>{{outfitReport.classKds[clazz.name].max.deaths}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>K/D</b></td>
+                                <td>{{(outfitReport.classKds[clazz.name].infil.kills / (outfitReport.classKds[clazz.name].infil.deaths || 1)).toFixed(2)}}</td>
+                                <td>{{(outfitReport.classKds[clazz.name].lightAssault.kills / (outfitReport.classKds[clazz.name].lightAssault.deaths || 1)).toFixed(2)}}</td>
+                                <td>{{(outfitReport.classKds[clazz.name].medic.kills / (outfitReport.classKds[clazz.name].medic.deaths || 1)).toFixed(2)}}</td>
+                                <td>{{(outfitReport.classKds[clazz.name].engineer.kills / (outfitReport.classKds[clazz.name].engineer.deaths || 1)).toFixed(2)}}</td>
+                                <td>{{(outfitReport.classKds[clazz.name].heavy.kills / (outfitReport.classKds[clazz.name].heavy.deaths || 1)).toFixed(2)}}</td>
+                                <td>{{(outfitReport.classKds[clazz.name].max.kills / (outfitReport.classKds[clazz.name].max.deaths || 1)).toFixed(2)}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Rezzed deaths</b></td>
+                                <td>
+                                    {{outfitReport.classKds[clazz.name].infil.score}}
+                                    ({{(outfitReport.classKds[clazz.name].infil.score / (outfitReport.classKds[clazz.name].infil.score + outfitReport.classKds[clazz.name].infil.deaths) * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{outfitReport.classKds[clazz.name].lightAssault.score}}
+                                    ({{(outfitReport.classKds[clazz.name].lightAssault.score / (outfitReport.classKds[clazz.name].lightAssault.score + outfitReport.classKds[clazz.name].lightAssault.deaths) * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{outfitReport.classKds[clazz.name].medic.score}}
+                                    ({{(outfitReport.classKds[clazz.name].medic.score / (outfitReport.classKds[clazz.name].medic.score + outfitReport.classKds[clazz.name].medic.deaths) * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{outfitReport.classKds[clazz.name].engineer.score}}
+                                    ({{(outfitReport.classKds[clazz.name].engineer.score / (outfitReport.classKds[clazz.name].engineer.score + outfitReport.classKds[clazz.name].engineer.deaths) * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{outfitReport.classKds[clazz.name].heavy.score}}
+                                    ({{(outfitReport.classKds[clazz.name].heavy.score / (outfitReport.classKds[clazz.name].heavy.score + outfitReport.classKds[clazz.name].heavy.deaths) * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{outfitReport.classKds[clazz.name].max.score}}
+                                    ({{(outfitReport.classKds[clazz.name].max.score / (outfitReport.classKds[clazz.name].max.score + outfitReport.classKds[clazz.name].max.deaths) * 100).toFixed(2)}}%)
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h5>Weapon types</h5>
+                    <div class="row">
+                        <div class="col-3">
+                            <breakdown :data="outfitReport.classTypeKills[clazz.name]" :show-all="false" :show-total="true"
+                                left-title="Kills" right-title="Amount" :show-percent="true" :clipped-amount="5">
+                            </breakdown>
+                        </div>
+                        <div class="col-3">
+                            <breakdown-chart :src="outfitReport.classTypeKills[clazz.name]"
+                                :show-percent="true">
+                            </breakdown-chart>
+                        </div>
+
+                        <div class="col-3">
+                            <breakdown :data="outfitReport.classTypeDeaths[clazz.name]" :show-all="false" :show-total="true"
+                                left-title="Deaths" right-title="Amount" :show-percent="true" :clipped-amount="5">
+                            </breakdown>
+                        </div>
+                        <div class="col-3">
+                            <breakdown-chart :src="outfitReport.classTypeDeaths[clazz.name]"
+                                :show-percent="true">
+                            </breakdown-chart>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-else>
+                    Hidden due to lack of players
+                </div>
+            </div>
+
+            <div class="col-12"> <!-- Misc stats -->
+                <h2 class="strike">Misc</h2>
+
+                <template v-if="outfitReport.vehicleKillBreakdown.data.length > 0">
+                    <h4 class="strike">Vehicle kills</h4>
+
+                    <div class="row">
+                        <div class="col-3">
+                            <breakdown :data="outfitReport.vehicleKillBreakdown" :show-total="true"
+                                left-title="Vehicle" right-title="Killed" :clipped-amount="10">
+                            </breakdown>
+                        </div>
+                        <div class="col-3">
+                            <breakdown-chart :src="outfitReport.vehicleKillBreakdown"
+                                :show-percent="false">
+                            </breakdown-chart>
+                        </div>
+
+                        <div class="col-3">
+                            <breakdown :data="outfitReport.vehicleKillWeaponBreakdown" :show-total="true" :show-all="false"
+                                left-title="Weapon" right-title="Killed" :show-percent="true" :clipped-amount="10">
+                            </breakdown>
+                        </div>
+                        <div class="col-3">
+                            <breakdown-chart :src="outfitReport.vehicleKillWeaponBreakdown"
+                                :show-percent="true">
+                            </breakdown-chart>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div class="col-12">
+                <h2 class="strike">Tracked players</h2>
+                <table class="table table-striped table-sm">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th>Player</th>
+                            <th>Time played</th>
+                            <th>Most played class</th>
+                            <th>Time as Infiltrator</th>
+                            <th>Time as Light Assault</th>
+                            <th>Time as Medic</th>
+                            <th>Time as Engineer</th>
+                            <th>Time as Heavy</th>
+                            <th>Time as MAX</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr v-for="player in outfitReport.players">
+                            <td>{{player.name}}</td>
+                            <td>{{player.secondsOnline | duration}}</td>
+                            <td><b>{{player.mostPlayed.name}}</b></td>
+                            <td>{{player.infil.secondsAs | minutes}}</td>
+                            <td>{{player.lightAssault.secondsAs | minutes}}</td>
+                            <td>{{player.medic.secondsAs | minutes}}</td>
+                            <td>{{player.engineer.secondsAs | minutes}}</td>
+                            <td>{{player.heavy.secondsAs | minutes}}</td>
+                            <td>{{player.max.secondsAs | minutes}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div v-else-if="view == 'winter'" class="row">
+            <div class="col-12" v-if="winter.report.state == 'loading'">
+                Loading...
+            </div>
+
+            <template v-else>
+                <div class="col-12"> <!-- Header -->
+                    <div class="d-flex align-items-center mb-2">
+                        <img :src="showFrog == false ? '/data/logo.png' : '/data/frog.png'" class="mr-1" style="max-width: 128px; max-height: 128px; border-radius: 30%;" title="Tide logo">
+                        <div class="d-flex flex-row flex-grow-1">
+                            <div class="flex-grow-1">
+                                <h2>Tide OP Tracker (TOPT)</h2>
+                                <h5 class="text-muted">Winter report</h5>
+                                <h5>
+                                    <a href="#">https://github.com/Varunda/topt/</a>
+                                </h5>
+                            </div>
+
+                            <div class="flex-grow-1">
+                                <div><b>Start:</b> {{winter.report.data.start | moment}}</div>
+                                <div><b>End:</b> {{winter.report.data.end | moment}}</div>
+                                <div><b>Duration:</b> {{winter.report.data.start | between(winter.report.data.end)}}</div>
+                                <div><b>Players:</b> {{winter.report.data.players.length}}</div>
+                            </div>
+
+                            <div>
+                                <button @click="view = 'realtime'" type="button" class="btn btn-secondary float-right">
+                                    &times;
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <h2 class="strike">Summary</h2>
+
+                    <div class="d-flex">
+                        <div v-for="metric in winter.report.data.essential.filter(iter => iter != undefined && iter.entries.length > 0)" class="card mr-2 mb-2" style="max-width: min(20%, 390px)">
+                            <span class="card-header">
+                                <h5>
+                                    {{winter.settings.useFunNames ? metric.funName : metric.name}}
+                                </h5>
+                                <h6 class="text-muted mb-0 mt-1">
+                                    {{metric.description}}
+                                </h6>
+                            </span>
+                            <div class="list-group list-group-flush flex-grow-1">
+                                <div v-for="entry in metric.entries" class="list-group-item border-top">
+                                    {{winter.settings.displayOutfitTag == true ? `[${entry.outfitTag}]` : ""}}
+                                    {{entry.name}} - {{entry.display != null ? entry.display : entry.value}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 class="strike">Leaderboards</h2>
+
+                    <div class="d-flex" style="flex-wrap: wrap">
+                        <div v-for="metric in winter.report.data.fun.filter(iter => iter != undefined && iter.entries.length > 0)" class="card mr-2 mb-2" style="max-width: min(20%, 390px)">
+                            <span class="card-header">
+                                <h5>
+                                    {{winter.settings.useFunNames ? metric.funName : metric.name}}
+                                </h5>
+                                <h6 class="text-muted mb-0 mt-1">
+                                    {{metric.description}}
+                                </h6>
+                            </span>
+                            <div class="list-group list-group-flush flex-grow-1">
+                                <div v-for="entry in metric.entries" class="list-group-item border-top">
+                                    {{winter.settings.displayOutfitTag == true ? `[${entry.outfitTag}]` : ""}}
+                                    {{entry.name}} - {{entry.display != null ? entry.display : entry.value}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div v-else-if="view == 'example'" class="row">
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-12">
+                        <h2>Capture - Hvar (Tech Plant)</h2>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-4">
+                        <div>
+                            <b>Start:</b> 2020-12-08 07:15:30PM
+                        </div>
+                        <div>
+                            <b>End:</b> 2020-12-08 07:22:30PM
+                        </div>
+                        <div>
+                            <b>Duration:</b> 7 minutes 0 seconds
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div>
+                            <b>Participants:</b> 22 attackers (10 tracked) / 31 defenders (0 tracked)
+                        </div>
+                        <div>
+                            <b>Heavies/Medics/Other:</b> 5/4/1
+                        </div>
+                        <div>
+                            <b>Previous owner: </b> FNXS - Pheonix Syndicate (NC)
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-4">
+                        <h4>Percent alive</h4>
+                        <breakdown-interval :src="exampleSlots" :show-labels="false"></breakdown-interval>
+                    </div>
+                    <div class="col-4">
+                        <h4>Top contributers:</h4>
+                        <table class="table table-sm">
+                            <tr class="table-secondary">
+                                <th>Action</th>
+                                <th>Player/Amount</th>
+                            </tr>
+
+                            <tr>
+                                <td>Kills</td>
+                                <td>Asc3nder / 14</td>
+                            </tr>
+
+                            <tr>
+                                <td>Heals</td>
+                                <td>RedFranz / 44</td>
+                            </tr>
+
+                            <tr>
+                                <td>Revives</td>
+                                <td>RedFranz / 35</td>
+                            </tr>
+
+                            <tr>
+                                <td>Resupplies</td>
+                                <td>Letus / 90</td>
+                            </tr>
+
+                            <tr>
+                                <td>Spawns</td>
+                                <td>Hypochaeris / 78</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-4">
+                        <h4>Participant stats:</h4>
+
+                        <table class="table table-sm">
+                            <tr class="table-secondary">
+                                <th>Stat</th>
+                                <th>Average</th>
+                                <th>Total</th>
+                            </tr>
+
+                            <tr>
+                                <td>K/D</td>
+                                <td>3.56</td>
+                                <td>--</td>
+                            </tr>
+
+                            <tr>
+                                <td>KPM</td>
+                                <td>1.2</td>
+                                <th>--</th>
+                            </tr>
+
+                            <tr>
+                                <td>Kills</td>
+                                <td>8.4</td>
+                                <td>84</td>
+                            </tr>
+
+                            <tr>
+                                <td>RPM</td>
+                                <td>2.2</td>
+                                <td>--</td>
+                            </tr>
+
+                            <tr>
+                                <td>Revives</td>
+                                <td>15.4</td>
+                                <td>77</td>
+                            </tr>
+                        </table>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div v-else-if="view == 'battle'" class="row">
+            <div class="col-12"> <!-- Header -->
+                <div class="d-flex align-items-center mb-2">
+                    <img :src="showFrog == false ? '/data/logo.png' : '/data/frog.png'" class="mr-1" style="max-width: 128px; max-height: 128px; border-radius: 30%;" title="Tide logo">
+                    <div class="d-flex flex-row flex-grow-1">
+                        <div class="flex-grow-1">
+                            <h2>Tide OP Tracker (TOPT)</h2>
+                            <h5 class="text-muted">Fight report</h5>
+                            <h5>
+                                <a href="https://github.com/Varunda/topt/">https://github.com/Varunda/topt/</a>
+                            </h5>
+                        </div>
+
+                        <div class="flex-grow-1">
+                            <div><b>Start:</b> {{battleReport.startTime | moment}}</div>
+                            <div><b>End:</b> {{battleReport.endTime | moment}}</div>
+                            <div><b>#Fights:</b> {{battleReport.entries.length}}</div>
+                        </div>
+
+                        <div>
+                            <button @click="view = 'realtime'" type="button" class="btn btn-secondary float-right">
+                                &times;
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-for="entry in battleReport.entries" class="col-12">
+                <h3>{{entry.name}}</h3>
+
+                <div class="row">
+                    <div class="col-4">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Property</th>
+                                    <th>Value</th>
+                                    <th>Per minute</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td>Time</td>
+                                    <td>{{entry.startTime | moment("hh:mm")}} - {{entry.endTime | moment("hh:mm")}}</td>
+                                    <td>--</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Duration</td>
+                                    <td>{{entry.startTime | between(entry.endTime)}}</td>
+                                    <td>--</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Participants</td>
+                                    <td>{{entry.participants.length}}</td>
+                                    <td>--</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Kills</td>
+                                    <td>{{entry.count.kills}}</td>
+                                    <td>{{(entry.count.kills / (entry.duration / 60)).toFixed(2)}}</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Deaths</td>
+                                    <td>{{entry.count.deaths}}</td>
+                                    <td>{{(entry.count.deaths / (entry.duration / 60)).toFixed(2)}}</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Revives</td>
+                                    <td>{{entry.count.revives}}</td>
+                                    <td>{{(entry.count.revives / (entry.duration / 60)).toFixed(2)}}</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Heals</td>
+                                    <td>{{entry.count.heals}}</td>
+                                    <td>{{(entry.count.heals / (entry.duration / 60)).toFixed(2)}}</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Spawns</td>
+                                    <td>{{entry.count.spawns}}</td>
+                                    <td>{{(entry.count.spawns / (entry.duration / 60)).toFixed(2)}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="col-3">
+                        <h4>KPM over time</h4>
+                        <breakdown-interval :src="entry.charts.kpm"></breakdown-interval>
+                    </div>
+
+                    <div class="col-3">
+                        <h4>#Unique enemies encountered</h4>
+                        <breakdown-interval :src="entry.charts.uniqueEnemies"></breakdown-interval>
+                    </div>
+
+                    <div class="col-2">
+                        <breakdown-chart :src="entry.classBreakdown" style="height: 200px;"
+                            :show-all="true" :clipped-amount="7">
+                        </breakdown-chart>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-3">
+                        <h4>Total #Kills</h4>
+                        <breakdown-interval :src="entry.charts.kills"></breakdown-interval>
+                    </div>
+
+                    <div class="col-3">
+                        <h4>Total #Deaths</h4>
+                        <breakdown-interval :src="entry.charts.deaths"></breakdown-interval>
+                    </div>
+
+                    <div class="col-3">
+                        <h4>Total #Heals</h4>
+                        <breakdown-interval :src="entry.charts.heals"></breakdown-interval>
+                    </div>
+
+                    <div class="col-3">
+                        <h4>Total #Revives</h4>
+                        <breakdown-interval :src="entry.charts.revives"></breakdown-interval>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-3">
+                        <h4>KPM</h4>
+                        <breakdown-box :src="entry.perPlayer.kpm"></breakdown-box>
+                    </div>
+
+                    <div class="col-3">
+                        <h4>KD</h4>
+                        <breakdown-box :src="entry.perPlayer.kd"></breakdown-box>
+                    </div>
+
+                    <div class="col-3">
+                        <h4>Heals per minute</h4>
+                        <breakdown-box :src="entry.perPlayer.hpm.filter(i => i > 0)"></breakdown-box>
+                    </div>
+
+                    <div class="col-3">
+                        <h4>Revives per minute</h4>
+                        <breakdown-box :src="entry.perPlayer.rpm.filter(i => i > 0)"></breakdown-box>
+                    </div>
+                </div>
+
+                <hr/>
+            </div>
+        </div>
+
+        <div v-else-if="view == 'deso'" class="row">
+            <div class="col-12"> <!-- Header -->
+                <div class="d-flex align-items-center mb-2">
+                    <img :src="showFrog == false ? '/data/logo.png' : '/data/frog.png'" class="mr-1" style="max-width: 128px; max-height: 128px; border-radius: 30%;" title="Tide logo">
+                    <div class="d-flex flex-row flex-grow-1">
+                        <div class="flex-grow-1">
+                            <h2>Tide OP Tracker (TOPT)</h2>
+                            <h5 class="text-muted">Asteroid report</h5>
+                            <h5>
+                                <a href="https://github.com/Varunda/topt/">https://github.com/Varunda/topt/</a>
+                            </h5>
+                        </div>
+
+                        <div class="flex-grow-1">
+                            <div><b>Start:</b> {{deso.report.data.startTime | moment}}</div>
+                            <div><b>End:</b> {{deso.report.data.endTime | moment}}</div>
+                            <div><b>Duration: </b> {{deso.report.data.startTime | between(deso.report.data.endTime)}}</div>
+                        </div>
+
+                        <div>
+                            <button @click="view = 'realtime'" type="button" class="btn btn-secondary float-right">
+                                &times;
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <h2 class="strike mt-0">Metrics</h2>
+                <table class="table table-sm table-striped">
+                    <thead>
+                        <tr class="table-secondary">
+                            <td><b>Metric</b></td>
+                            <td><b>Total</b></td>
+                            <td><b>Average</b></td>
+                            <td><b>Infil</b></td>
+                            <td><b>LA</b></td>
+                            <td><b>Medic</b></td>
+                            <td><b>Eng</b></td>
+                            <td><b>Heavy</b></td>
+                            <td><b>MAX</b></td>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td><b>Players</b></td>
+                            <td>
+                                {{deso.report.data.players.length}}
+                            </td>
+                            <td>
+                                --
+                            </td>
+                            <td>
+                                {{deso.report.data.players.filter(iter => iter.mostPlayed.name == 'Infiltrator').length}}
+                            </td>
+                            <td>
+                                {{deso.report.data.players.filter(iter => iter.mostPlayed.name == 'Light Assault').length}}
+                            </td>
+                            <td>
+                                {{deso.report.data.players.filter(iter => iter.mostPlayed.name == 'Medic').length}}
+                            </td>
+                            <td>
+                                {{deso.report.data.players.filter(iter => iter.mostPlayed.name == 'Engineer').length}}
+                            </td>
+                            <td>
+                                {{deso.report.data.players.filter(iter => iter.mostPlayed.name == 'Heavy').length}}
+                            </td>
+                            <td>
+                                {{deso.report.data.players.filter(iter => iter.mostPlayed.name == 'MAX').length}}
+                            </td>
+                        </tr>
+                        <tr v-for="stat in ['Kill', 'Death']">
+                            <template v-if="deso.report.data.classStats.get(stat) != undefined">
+                                <td><b>{{stat}}</b></td>
+                                <td>{{deso.report.data.classStats.get(stat).total}}</td>
+                                <td>{{(deso.report.data.classStats.get(stat).total / deso.report.data.players.length).toFixed(2)}}</td>
+                                <td>{{deso.report.data.classStats.get(stat).infil}}</td>
+                                <td>{{deso.report.data.classStats.get(stat).lightAssault}}</td>
+                                <td>{{deso.report.data.classStats.get(stat).medic}}</td>
+                                <td>{{deso.report.data.classStats.get(stat).engineer}}</td>
+                                <td>{{deso.report.data.classStats.get(stat).heavy}}</td>
+                                <td>{{deso.report.data.classStats.get(stat).max}}</td>
+                            </template>
+                        </tr>
+                        <tr>
+                            <template v-if="deso.report.data.classStats.get('Kill') != undefined && deso.report.data.classStats.get('Death') != undefined">
+                                <td><b>K/D</b></td>
+                                <td>--</td>
+                                <td>{{(deso.report.data.classStats.get('Kill').total / deso.report.data.classStats.get('Death').total).toFixed(2)}}</td>
+                                <td>{{(deso.report.data.classStats.get('Kill').infil / deso.report.data.classStats.get('Death').infil).toFixed(2)}}</td>
+                                <td>{{(deso.report.data.classStats.get('Kill').lightAssault / deso.report.data.classStats.get('Death').lightAssault).toFixed(2)}}</td>
+                                <td>{{(deso.report.data.classStats.get('Kill').medic / deso.report.data.classStats.get('Death').medic).toFixed(2)}}</td>
+                                <td>{{(deso.report.data.classStats.get('Kill').engineer/ deso.report.data.classStats.get('Death').engineer).toFixed(2)}}</td>
+                                <td>{{(deso.report.data.classStats.get('Kill').heavy / deso.report.data.classStats.get('Death').heavy).toFixed(2)}}</td>
+                                <td>{{(deso.report.data.classStats.get('Kill').max / deso.report.data.classStats.get('Death').max).toFixed(2)}}</td>
+                            </template>
+                        </tr>
+                        <tr>
+                            <template v-if="deso.report.data.classStats.get('Headshot') != undefined">
+                                <td><b>Headshot</b></td>
+                                <td>
+                                    {{deso.report.data.classStats.get('Headshot').total}}
+                                    ({{(deso.report.data.classStats.get('Headshot').total / deso.report.data.classStats.get('Kill').total * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{(deso.report.data.classStats.get('Headshot').total / deso.report.data.players.length).toFixed(2)}}
+                                </td>
+                                <td>
+                                    {{deso.report.data.classStats.get('Headshot').infil}}
+                                    ({{(deso.report.data.classStats.get('Headshot').infil / deso.report.data.classStats.get('Kill').infil * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{deso.report.data.classStats.get('Headshot').lightAssault}}
+                                    ({{(deso.report.data.classStats.get('Headshot').lightAssault / deso.report.data.classStats.get('Kill').lightAssault * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{deso.report.data.classStats.get('Headshot').medic}}
+                                    ({{(deso.report.data.classStats.get('Headshot').medic / deso.report.data.classStats.get('Kill').medic * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{deso.report.data.classStats.get('Headshot').engineer}}
+                                    ({{(deso.report.data.classStats.get('Headshot').engineer / deso.report.data.classStats.get('Kill').engineer * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{deso.report.data.classStats.get('Headshot').heavy}}
+                                    ({{(deso.report.data.classStats.get('Headshot').heavy / deso.report.data.classStats.get('Kill').heavy * 100).toFixed(2)}}%)
+                                </td>
+                                <td>
+                                    {{deso.report.data.classStats.get('Headshot').max}}
+                                    ({{(deso.report.data.classStats.get('Headshot').max / deso.report.data.classStats.get('Kill').max * 100).toFixed(2)}}%)
+                                </td>
+                            </template>
+                        </tr>
+
+                        <tr v-for="stat in ['Kill assist', 'Revived', 'Transport assist', 'Beacon kill', 'Control point attack', 'Control point defend']">
+                            <template v-if="deso.report.data.classStats.get(stat) != undefined">
+                                <td><b>{{stat}}</b></td>
+                                <td>{{deso.report.data.classStats.get(stat).total}}</td>
+                                <td>{{(deso.report.data.classStats.get(stat).total / deso.report.data.players.length).toFixed(2)}}</td>
+                                <td>{{deso.report.data.classStats.get(stat).infil}}</td>
+                                <td>{{deso.report.data.classStats.get(stat).lightAssault}}</td>
+                                <td>{{deso.report.data.classStats.get(stat).medic}}</td>
+                                <td>{{deso.report.data.classStats.get(stat).engineer}}</td>
+                                <td>{{deso.report.data.classStats.get(stat).heavy}}</td>
+                                <td>{{deso.report.data.classStats.get(stat).max}}</td>
+                            </template>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-12">
+                <h2 class="strike">Spawns</h2>
+                <div class="row">
+                    <div class="col-3">
+                        <breakdown-chart :src="deso.report.data.spawnType"
+                            :show-all="true" :clipped-amount="8">
+                        </breakdown-chart>
+                    </div>
+
+                    <div class="col-3">
+                        <breakdown :data="deso.report.data.spawnType" :show-all="true"
+                            left-title="Spawn type" right-title="Amount"
+                            :show-percent="true" :clipped-amount="10" :show-total="true">
+                        </breakdown>
+                    </div>
+
+                    <div class="col-3">
+                        <breakdown-chart :src="deso.report.data.spawnProviders"
+                            :show-all="false" :clipped-amount="8">
+                        </breakdown-chart>
+                    </div>
+
+                    <div class="col-3">
+                        <breakdown :data="deso.report.data.spawnProviders" :show-all="false"
+                            left-title="Player" right-title="Spawns"
+                            :show-percent="true" :clipped-amount="10" :show-total="true">
+                        </breakdown>
+                    </div>
+                </div>
+
+                <h4 class="strike">Sundy spawn stats ({{deso.report.data.sundies.length}} total)</h4>
+                <table class="table table-sm table-striped">
+                    <tr>
+                        <th>Owner</th>
+                        <th>First spawn</th>
+                        <th>Last spawn</th>
+                        <th>Destroyed at</th>
+                        <td>Duration</td>
+                        <th>Destroyed by</th>
+                        <th>Total spawns</th>
+                        <th>Spawns per minute</th>
+                    </tr>
+
+                    <tr v-for="entry in deso.report.data.sundies">
+                        <td>{{entry.ownerID}}</td>
+                        <td>{{entry.firstSpawnAt | moment}}</td>
+                        <td>{{entry.spawns[entry.spawns.length - 1] | moment}}</td>
+                        <td>{{entry.destroyedAt | moment}}</td>
+                        <td>{{entry.firstSpawnAt | between(entry.destroyedAt)}}</td>
+                        <td>{{entry.destroyedByID}}</td>
+                        <td>{{entry.spawns.length}}</td>
+                        <td>{{
+                                ((entry.spawns.length) / ((entry.destroyedAt - entry.firstSpawnAt) / 60000)).toFixed(2)
+                        }}</td>
+                    </tr>
+
+                </table>
+
+                <h4 class="strike">Router spawn stats ({{deso.report.data.routers.length}} total)</h4>
+                <table class="table table-sm table-striped">
+                    <tr>
+                        <th>Owner</th>
+                        <th>First spawn</th>
+                        <th>Last spawn</th>
+                        <th>Destroyed at</th>
+                        <td>Duration</td>
+                        <th>Destroyed by</th>
+                        <th>Total spawns</th>
+                        <th>Spawns per minute</th>
+                    </tr>
+
+                    <tr v-for="entry in deso.report.data.routers">
+                        <td>{{entry.ownerID}}</td>
+                        <td>{{entry.firstSpawnAt | moment}}</td>
+                        <td>{{entry.spawns[entry.spawns.length - 1] | moment}}</td>
+                        <td>{{entry.destroyedAt | moment}}</td>
+                        <td>{{entry.firstSpawnAt | between(entry.destroyedAt)}}</td>
+                        <td>{{entry.destroyedByID}}</td>
+                        <td>{{entry.spawns.length}}</td>
+                        <td>{{
+                                ((entry.spawns.length) / ((entry.destroyedAt - entry.firstSpawnAt) / 60000)).toFixed(2)
+                        }}</td>
+                    </tr>
+                </table>
+
+                <h2 class="strike">Vehicles killed</h2>
+                <div class="row">
+                    <div class="col-3">
+                        <breakdown-chart :src="deso.report.data.vehicleKills.type"
+                            :show-all="false" :clipped-amount="8">
+                        </breakdown-chart>
+                    </div>
+
+                    <div class="col-3">
+                        <breakdown :data="deso.report.data.vehicleKills.type" :show-all="false"
+                            left-title="Vehicle" right-title="Amount"
+                            :show-percent="true" :clipped-amount="10" :show-total="true">
+                        </breakdown>
+                    </div>
+
+                    <div class="col-3">
+                        <breakdown-chart :src="deso.report.data.vehicleKills.players"
+                            :show-all="false" :clipped-amount="8">
+                        </breakdown-chart>
+                    </div>
+
+                    <div class="col-3">
+                        <breakdown :data="deso.report.data.vehicleKills.players" :show-all="false"
+                            left-title="Player" right-title="Amount"
+                            :show-percent="true" :clipped-amount="10" :show-total="true">
+                        </breakdown>
+                    </div>
+                </div>
+
+                <h2 class="strike">Vehicles lost</h2>
+                <div class="row">
+                    <div class="col-3">
+                        <breakdown-chart :src="deso.report.data.vehicleDeaths.type"
+                            :show-all="false" :clipped-amount="8">
+                        </breakdown-chart>
+                    </div>
+
+                    <div class="col-3">
+                        <breakdown :data="deso.report.data.vehicleDeaths.type" :show-all="false"
+                            left-title="Vehicle" right-title="Amount"
+                            :show-percent="true" :clipped-amount="10" :show-total="true">
+                        </breakdown>
+                    </div>
+
+                    <div class="col-3">
+                        <breakdown-chart :src="deso.report.data.vehicleDeaths.players"
+                            :show-all="false" :clipped-amount="8">
+                        </breakdown-chart>
+                    </div>
+
+                    <div class="col-3">
+                        <breakdown :data="deso.report.data.vehicleDeaths.players" :show-all="false"
+                            left-title="Player" right-title="Amount"
+                            :show-percent="true" :clipped-amount="10" :show-total="true">
+                        </breakdown>
+                    </div>
+                </div>
+
+                <h2 class="strike">Vehicle v Vehicle</h2>
+                <table class="table table-sm table-striped">
+                    <tr>
+                        <th></th>
+                        <th>Flash</th>
+                        <th>Sunderer</th>
+                        <th>Lightning</th>
+                        <th>Magrider</th>
+                        <th>Vanguard</th>
+                        <th>Prowler</th>
+                        <th>Scythe</th>
+                        <th>Reaver</th>
+                        <th>Mosquito</th>
+                        <th>Liberator</th>
+                        <th>Galaxy</th>
+                        <th>Harasser</th>
+                        <th>Valkyrie</th>
+                        <th>ANT</th>
+                        <th>Colossus</th>
+                    </tr>
+
+                    <tr is="vehicle-versus-entry" name="Flash" :entry="deso.report.data.versus.flash"></tr>
+                    <tr is="vehicle-versus-entry" name="Sunderer" :entry="deso.report.data.versus.sundy"></tr>
+                    <tr is="vehicle-versus-entry" name="Lightning" :entry="deso.report.data.versus.lightning"></tr>
+                    <tr is="vehicle-versus-entry" name="Magrider" :entry="deso.report.data.versus.magrider"></tr>
+                    <tr is="vehicle-versus-entry" name="Vanguard" :entry="deso.report.data.versus.vanguard"></tr>
+                    <tr is="vehicle-versus-entry" name="Prowler" :entry="deso.report.data.versus.prowler"></tr>
+                    <tr is="vehicle-versus-entry" name="Scythe" :entry="deso.report.data.versus.scythe"></tr>
+                    <tr is="vehicle-versus-entry" name="Reaver" :entry="deso.report.data.versus.reaver"></tr>
+                    <tr is="vehicle-versus-entry" name="Mosquito" :entry="deso.report.data.versus.mossie"></tr>
+                    <tr is="vehicle-versus-entry" name="Liberator" :entry="deso.report.data.versus.lib"></tr>
+                    <tr is="vehicle-versus-entry" name="Galaxy" :entry="deso.report.data.versus.galaxy"></tr>
+                    <tr is="vehicle-versus-entry" name="Harasser" :entry="deso.report.data.versus.harasser"></tr>
+                    <tr is="vehicle-versus-entry" name="Valkyrie" :entry="deso.report.data.versus.valk"></tr>
+                    <tr is="vehicle-versus-entry" name="ANT" :entry="deso.report.data.versus.ant"></tr>
+                    <tr is="vehicle-versus-entry" name="Colossus" :entry="deso.report.data.versus.colussus"></tr>
+                </table>
+
+            </div>
+
+        </div>
+
+        <div v-else-if="view == 'saladfork'" class="row">
+            <div class="col-12" v-if="saladfork.report.state == 'loading'">
+                Loading...
+            </div>
+
+            <template v-else>
+                <div class="col-12"> <!-- Header -->
+                    <div class="d-flex align-items-center mb-2">
+                        <img src="/data/CML-logo.png" class="mr-1" style="max-width: 128px; max-height: 128px;" title="CML logo">
+                        <div class="d-flex flex-row flex-grow-1">
+                            <div class="flex-grow-1">
+                                <h2>{{saladfork.report.data.outfits.map(o => o.tag).join(', ')}} {{saladfork.report.data.outfits.length > 1 ? 'Joint Ops' : 'Ops'}} Report</h2>
+                                <h5 class="text-muted">
+                                    {{saladfork.report.data.start | moment('dddd, MMMM Do, YYYY')}}
+                                </h5>
+                            </div>
+
+                            <div class="flex-grow-1">
+                                <div><b>Start:</b> {{saladfork.report.data.start | moment}}</div>
+                                <div><b>End:</b> {{saladfork.report.data.end | moment}}</div>
+                                <div><b>Duration:</b> {{saladfork.report.data.start | between(saladfork.report.data.end)}}</div>
+                                <div><b>Players:</b> {{saladfork.report.data.players.length}}</div>
+                            </div>
+
+                            <div>
+                                <button @click="view = 'realtime'" type="button" class="btn btn-secondary float-right">
+                                    &times;
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-12"> <!-- Body -->
+                    <h2 class="strike">Summary</h2>
+
+                    <div class="d-flex">
+                        <div v-for="metric in saladfork.report.data.summary.filter(iter => iter != undefined && iter.entries.length > 0)" class="card mr-2 mb-2">
+                            <span class="card-header">
+                                <h5>
+                                    {{metric.name}}
+                                </h5>
+                            </span>
+                            <table>
+                                <tr v-for="entry in metric.entries" class="border-top">
+                                    <td style="padding: 12px 20px;">{{entry.name}}</td>
+                                    <td style="padding: 12px 20px; text-align: right;">{{entry.display != null ? entry.display : entry.value}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <h2 class="strike">Leaderboards</h2>
+
+                    <template v-for="section in Object.keys(saladfork.report.data.leaderboards)">
+                        <h4 class="strike">{{section}}</h4>
+
+                        <div class="d-flex" style="flex-wrap: wrap">
+                            <div v-for="metric in saladfork.report.data.leaderboards[section].filter(iter => iter != undefined && iter.entries.length > 0)" class="card mr-2 mb-2">
+                                <h5 class="card-header">
+                                    {{metric.name}}
+                                </h5>
+                                <table>
+                                    <tr v-for="entry in metric.entries" :class="[ entry.prefix.length ? 'border-top' : '' ]">
+                                        <td style="padding: 12px 5px;">{{entry.prefix}}</td>
+                                        <td v-if="saladfork.settings.displayOutfitTags" class="text-muted" style="padding: 12px 0; text-align: right;">
+                                            {{entry.outfitTag.length ? `[${entry.outfitTag}]` : ""}}
+                                        </td>
+                                        <td style="padding: 12px 15px 12px 4px">
+                                            {{entry.name}}
+                                        </td>
+                                        <td style="padding: 12px 20px; text-align: right;">{{entry.display != null ? entry.display : entry.value}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="col-12 text-center mt-4">
+                    <p class="text-muted">
+                        Generated by with a custom build of
+                        <a href="https://github.com/Varunda/topt/">
+                            Tide OP Tracker
+                        </a>
+                    </p>
+                </div>
+            </template>
+        </div>
+
+        <div v-else>
+            Unknown view: {{view}}
+
+            <button type="button" class="btn btn-primary" @click="view = 'realtime'">
+                Return to safety
+            </button>
+        </div>
+
+        <div class="modal" id="generation-modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Progress</h5>
+
+                        <button type="button" class="btn btn-danger">
+                            Cancel
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="list-group list-group-small">
+                            <div class="list-group-item list-group-item-secondary">
+                                <div class="row">
+                                    <div class="col-6">
+                                        Name
+                                    </div>
+                                    <div class="col-6">
+                                        Done?
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-for="(step, index) in generation.names" class="list-group-item">
+                                <div class="row">
+                                    <div class="col-6">
+                                        {{step}}
+                                    </div>
+                                    <div class="col-6">
+                                        {{generation.state[index]}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="logger-modal">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Loggers</h5>
+
+                        <button type="button" class="close" data-dismiss="modal">
+                            &times;
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Logger</th>
+                                    <th>Level</th>
+                                    <th>Set level</th>
+                                    <th>Enable</th>
+                                    <th>Disable</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr v-for="logger in loggers">
+                                    <td>{{logger.name}}</td>
+                                    <td>{{logger.level}}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-info"
+                                                @click="updateLogger(logger.name, l => l.setLevel(0))">
+                                                Trace
+                                            </button>
+                                            <button type="button" class="btn btn-info"
+                                                @click="updateLogger(logger.name, l => l.setLevel(1))">
+                                                Debug
+                                            </button>
+                                            <button type="button" class="btn btn-info"
+                                                @click="updateLogger(logger.name, l => l.setLevel(2))">
+                                                Info
+                                            </button>
+                                            <button type="button" class="btn btn-info"
+                                                @click="updateLogger(logger.name, l => l.setLevel(3))">
+                                                Warn
+                                            </button>
+                                            <button type="button" class="btn btn-info"
+                                                @click="updateLogger(logger.name, l => l.setLevel(4))">
+                                                Error
+                                            </button>
+                                            <button type="button" class="btn btn-info"
+                                                @click="updateLogger(logger.name, l => l.setLevel(5))">
+                                                Silent
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-success"
+                                            @click="updateLogger(logger.name, l => l.enableAll())">
+                                            Enable
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-success"
+                                            @click="updateLogger(logger.name, l => l.disableAll())">
+                                            Disable
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="modal" id="report-modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Reports</h5>
+
+                        <button type="button" class="close" data-dismiss="modal">
+                            &times;
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <select v-model="parameters.report" class="form-control">
+                            <option disabled selected>Select a report</option>
+                            <option value="ops">OPs report</option>
+                            <option value="winter">Winter report</option>
+                            <option value="battle">Fight report</option>
+                            <option value="personal">Personal reports</option>
+                            <option value="deso">Asteroid report</option>
+                            <option value="saladfork">SaladFork report</option>
+                        </select>
+
+                        <hr>
+
+                        <div v-if="parameters.report == 'ops'">
+                            <h6 class="strike">OPs report settings</h6>
+
+                            <label class="col-form-label">Generate squad stats?</label>
+                            <select v-model="opsReportSettings.showSquadStats" class="form-control">
+                                <option :value="true">Yes</option>
+                                <option :value="false">No</option>
+                            </select>
+
+                            <label class="col-form-label">Limit by squad?</label>
+                            <select v-model.number="parameters.squadForReport" class="form-control">
+                                <option :value="null">Nope</option>
+                                <template v-for="squad in core.squad.perm">
+                                    <option :value="squad.ID">{{squad.display}} / {{squad.name}}</option>
+                                </template>
+                                <template v-for="squad in core.squad.guesses">
+                                    <option :value="squad.ID">{{squad.name}}</option>
+                                </template>
+                            </select>
+
+                            <hr>
+
+                            <div v-if="outfit.steps.length > 0">
+                                Progresss:
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Step</th>
+                                            <th>State</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr v-for="step in outfit.steps">
+                                            <td>{{step.name}}</td>
+                                            <td>{{step.state}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div v-else-if="parameters.report == 'winter'">
+                            <h6 class="strike">Winter report settings</h6>
+
+                            <label class="col-form-label">What names to display?</label>
+                            <select v-model="winter.settings.useFunNames" class="form-control">
+                                <option :value="true">Use fun names</option>
+                                <option :value="false">Use descriptive names</option>
+                            </select>
+
+                            <label class="col-form-label">How many leadersboards to show?</label>
+                            <select v-model="winter.settings.funMetricCount" class="form-control">
+                                <option :value="-1">Show all leaderboards</option>
+                                <option :value="10">Show 10 random leaderboards</option>
+                                <option :value="20">Show 20 random leaderboards</option>
+                            </select>
+
+                            <label class="col-form-label">How many players to show on each leaderboard?</label>
+                            <select v-model="winter.settings.topNPlayers" class="form-control">
+                                <option :value="5">5</option>
+                                <option :value="8">8</option>
+                                <option :value="10">10</option>
+                            </select>
+
+                            <label class="col-form-label">Display outfit tag?</label>
+                            <select v-model="winter.settings.displayOutfitTag" class="form-control">
+                                <option :value="false">No</option>
+                                <option :value="true">Yes</option>
+                            </select>
+
+                            <label class="col-form-label">Include vehicle stats</label>
+                            <select v-model="winter.settings.includeVehicles" class="form-control">
+                                <option :value="false">No</option>
+                                <option :value="true">Yes</option>
+                            </select>
+
+                            <label class="col-form-label">Players to ignore (separate with a space)</label>
+                            <textarea v-model="winter.ignoredPlayers" class="form-control">
+                            </textarea>
+
+                            <label class="col-form-label">Limit by squad?</label>
+                            <select v-model.number="parameters.squadForReport" class="form-control">
+                                <option :value="null">Nope</option>
+                                <template v-for="squad in core.squad.perm">
+                                    <option :value="squad.ID">{{squad.display}} / {{squad.name}}</option>
+                                </template>
+                                <template v-for="squad in core.squad.guesses">
+                                    <option :value="squad.ID">{{squad.name}}</option>
+                                </template>
+                            </select>
+
+                        </div>
+
+                        <div v-else-if="parameters.report == 'personal'">
+                            <h6 class="strike">Personal report settings</h6>
+                        </div>
+
+                        <div v-else-if="parameters.report == 'deso'">
+                            <h6 class="strike">Asteroid report settings</h6>
+                        </div>
+
+                        <div v-else-if="parameters.report == 'saladfork'">
+                            <h6 class="strike">SaladFork report settings</h6>
+
+                            <label class="col-form-label">Display outfit tags?</label>
+                            <select v-model="saladfork.settings.displayOutfitTags" class="form-control">
+                                <option :value="false">No</option>
+                                <option :value="true">Yes</option>
+                            </select>
+                        </div>
+
+                        <hr>
+
+                        <button @click="generateReport" :disabled="parameters.report == ''"
+                                class="btn btn-success">
+                            Generate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="settings-modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Settings</h5>
+
+                        <button type="button" class="close" data-dismiss="modal">
+                            &times;
+                        </button>
+                    </div>
+
+                    <div>
+                        <div class="form-group">
+                            <label>Update rate</label>
+
+                            <input v-model.number="settings.updateRate"
+                                type="number"
+                                class="form-control"
+                                placeholder="Seconds"
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="contact-modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            Contact information
+                        </h5>
+
+                        <button type="button" class="close" data-dismiss="modal">
+                            &times;
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <p>This is the Tide OP Tracker, used by [T1DE] Tide on Connery TR</p>
+
+                        <p>This tracker is currently under development, and I'd love to hear your feedback on it</p>
+
+                        If you have:
+                        <ul>
+                            <li>Feedback</li>
+                            <li>A bug you found</li>
+                            <li>A feature you'd like added</li>
+                        </ul>
+
+                        Please join the Tide Discord:
+                        <a href="https://discord.gg/3X5QPuM" target="_blank">
+                            https://discord.gg/3X5QPuM
+                        </a>
+                        <p>
+                            and ping @Varunda, or use one of the topt channels
+                        </p>
+
+                        <hr>
+
+                        <p>
+                            GitHub:
+                            <a href="https://github.com/Varunda/topt/" target="_blank">
+                                https://github.com/Varunda/topt/
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
