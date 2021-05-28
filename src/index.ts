@@ -37,6 +37,7 @@ import "RelicImage";
 import Core, {
     ApiResponse,
     WinterReportGenerator, WinterReport, WinterReportParameters, WinterReportSettings,
+    SaladForkReportGenerator, SaladForkReportParameters, SaladForkReport,
     IndividualReporter, Report, ReportParameters,
     OutfitReport, OutfitReportGenerator, OutfitReportSettings,
     FightReport, FightReportParameters, FightReportGenerator, FightReportEntry,
@@ -164,7 +165,7 @@ export const vm = new Vue({
     data: {
         coreObject: null as (Core | null),
 
-        view: "setup" as "setup" | "realtime" | "ops" | "killfeed" | "winter" | "example" | "battle" | "deso" | "map" | "speedrun" | "speedrun_setup",
+        view: "setup" as "setup" | "realtime" | "ops" | "killfeed" | "winter" | "example" | "battle" | "deso" | "map" | "speedrun" | "speedrun_setup" | "saladfork",
 
         connecting: false as boolean,
 
@@ -283,6 +284,10 @@ export const vm = new Vue({
             settings: new WinterReportSettings() as WinterReportSettings,
 
             ignoredPlayers: "" as string
+        },
+
+        saladfork: {
+            report: Loadable.idle() as Loading<SaladForkReport>
         },
 
         deso: {
@@ -639,7 +644,7 @@ export const vm = new Vue({
 
                     if (ev.vehicleID == Vehicles.mosquito || ev.vehicleID == Vehicles.reaver || ev.vehicleID == Vehicles.scythe
                         || ev.vehicleID == Vehicles.valkyrie || ev.vehicleID == Vehicles.galaxy || ev.vehicleID == Vehicles.liberator) {
-                        
+
                         ++stats.airKills;
                     } else if (ev.vehicleID == Vehicles.lightning
                         || ev.vehicleID == Vehicles.vanguard || ev.vehicleID == Vehicles.magrider || ev.vehicleID == Vehicles.prowler
@@ -1157,6 +1162,11 @@ export const vm = new Vue({
                     $("#report-modal").modal("hide");
                     this.parameters.report = "";
                 });
+            } else if (this.parameters.report == 'saladfork') {
+                this.generateSaladForkReport().then(() => {
+                    $("#report-modal").modal("hide");
+                    this.parameters.report = "";
+                })
             }
         },
 
@@ -1242,7 +1252,7 @@ export const vm = new Vue({
 
                 params.events.push(...player.events);
             });
-            
+
             params.events.push(...this.core.miscEvents);
             params.events.push(...this.core.playerCaptures);
             params.events = params.events.sort((a, b) => a.timestamp - b.timestamp);
@@ -1349,6 +1359,25 @@ export const vm = new Vue({
 
                 return IndividualReporter.generatePersonalReport(parameters);
             }
+        },
+
+        generateSaladForkReport: async function (): Promise<void> {
+            const players: TrackedPlayer[] = Array.from(this.core.stats.values())
+
+            console.log(`Making a SaladFork report with: ${players.map(p => p.name).join(',')}`)
+
+            const params: SaladForkReportParameters = new SaladForkReportParameters()
+            params.players = players
+            params.timeTracking = this.core.tracking
+
+            this.core.stats.forEach((player: TrackedPlayer) => {
+                if (!player.events.length) return
+                params.events.push(...player.events)
+            })
+
+            this.saladfork.report = Loadable.loading()
+            this.saladfork.report = Loadable.loaded(await SaladForkReportGenerator.generate(params))
+            this.view = 'saladfork'
         },
 
         generateAllReports: async function(): Promise<void> {
