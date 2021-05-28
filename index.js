@@ -8919,6 +8919,7 @@ class SaladForkReport {
         this.summary = [];
         this.leaderboards = {};
         this.players = [];
+        this.outfits = [];
     }
 }
 exports.SaladForkReport = SaladForkReport;
@@ -8965,17 +8966,16 @@ class SaladForkReportGenerator {
             report.players = [
                 ...parameters.players.filter(iter => iter.events.length > 0)
             ];
+            report.outfits = [...parameters.outfits].sort((b, a) => a.tag === 'CML' ? 1 : b.tag === 'CML' ? -1 : a > b ? -1 : b > a ? 1 : 0);
             report.summary.push(this.killStats(parameters));
-            report.summary.push(yield this.basesCaptured(parameters));
-            // Bases Captured (+ Assisted)
+            report.summary.push(yield this.basesTagged(parameters));
             // Most picked-on enemies (by kills)
             // report.leaderboards.push(this.topVictims(parameters))
             // Logistics
             report.leaderboards.Logistics = [];
-            report.leaderboards.Logistics.push(this.galaxySpawns(parameters)); // havent seen work yet
+            report.leaderboards.Logistics.push(this.squadBeaconSpawns(parameters));
             report.leaderboards.Logistics.push(this.sundererSpawns(parameters));
             report.leaderboards.Logistics.push(this.routerSpawns(parameters));
-            report.leaderboards.Logistics.push(this.squadBeaconSpawns(parameters));
             report.leaderboards.Logistics.push(this.transportAssists(parameters));
             // Support
             report.leaderboards.Support = [];
@@ -9037,32 +9037,33 @@ class SaladForkReportGenerator {
             ]
         };
     }
-    static basesCaptured(parameters) {
+    static basesTagged(parameters) {
         return __awaiter(this, void 0, void 0, function* () {
             const outfitIds = parameters.outfits.map(o => o.ID);
-            const captures = parameters.captures.filter(c => outfitIds.includes(c.outfitID));
+            const captures = parameters.captures.filter(capture => outfitIds.includes(capture.outfitID) &&
+                capture.factionID !== capture.previousFaction);
             const facilityIds = captures
                 .map(c => c.facilityID)
                 .filter((value, index, arr) => arr.indexOf(value) === index);
             const facilities = yield FacilityAPI_1.FacilityAPI.getByIDs(facilityIds);
             return {
-                name: `${captures.length} Bases Captured`,
+                name: `${captures.length} ${captures.length === 1 ? 'Base' : 'Bases'} Tagged`,
                 entries: captures.map(capture => {
                     var _a;
-                    return ({
-                        name: ((_a = facilities.find(f => f.ID === capture.facilityID)) === null || _a === void 0 ? void 0 : _a.name) || 'Unknown',
+                    const facility = facilities.find(f => f.ID === capture.facilityID);
+                    const facilityName = (facility === null || facility === void 0 ? void 0 : facility.name) || 'Unknown';
+                    const zoneName = facility
+                        ? { 2: 'Indar', 4: 'Hossin', 6: 'Amerish', 8: 'Esamir' }[facility === null || facility === void 0 ? void 0 : facility.zoneID]
+                        : 'Unknown';
+                    const outfitTag = (_a = parameters.outfits.find(o => o.ID === capture.outfitID)) === null || _a === void 0 ? void 0 : _a.tag;
+                    return {
+                        name: `${outfitTag ? `[${outfitTag}]` : ''} ${zoneName} - ${facilityName}`,
                         value: parseInt(capture.previousFaction, 10),
                         display: { 1: 'from VS', 2: 'from NC', 3: 'from TR', 4: 'from NS' }[capture.previousFaction] || ''
-                    });
+                    };
                 })
             };
         });
-    }
-    static galaxySpawns(parameters) {
-        return {
-            name: 'Galaxy Spawns',
-            entries: this.sumOfStatsByPlayer(parameters, [PsEvent_1.PsEvent.galaxySpawn])
-        };
     }
     static sundererSpawns(parameters) {
         return {
@@ -9078,7 +9079,7 @@ class SaladForkReportGenerator {
     }
     static squadBeaconSpawns(parameters) {
         return {
-            name: 'Beacon Spawns',
+            name: 'Galaxy/Beacon Spawns',
             entries: this.sumOfStatsByPlayer(parameters, [PsEvent_1.PsEvent.squadSpawn])
         };
     }
@@ -9347,11 +9348,15 @@ class SaladForkReportGenerator {
             if (score > 0)
                 counts.set(player.name, score);
         }
-        return this.entriesToLeaderboard(Array.from(counts.getMap().entries()).map(([playerName, count]) => ({
-            name: playerName,
-            value: count,
-            display: display ? display(count) : null
-        })));
+        return this.entriesToLeaderboard(Array.from(counts.getMap().entries()).map(([playerName, count]) => {
+            var _a, _b;
+            return ({
+                name: playerName,
+                outfitTag: (_b = (_a = parameters.players.find(i => i.name.toLowerCase() == playerName.toLowerCase())) === null || _a === void 0 ? void 0 : _a.outfitTag) !== null && _b !== void 0 ? _b : '',
+                value: count,
+                display: display ? display(count) : null
+            });
+        }));
     }
     static entriesToLeaderboard(entries) {
         const sortedEntries = entries
@@ -9388,7 +9393,7 @@ exports.SaladForkReportGenerator = SaladForkReportGenerator;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SaladForkReportParameters = void 0;
+exports.SaladForkReportSettings = exports.SaladForkReportParameters = void 0;
 class SaladForkReportParameters {
     constructor() {
         this.players = [];
@@ -9396,9 +9401,17 @@ class SaladForkReportParameters {
         this.captures = [];
         this.outfits = [];
         this.timeTracking = { startTime: 0, endTime: 0, running: false };
+        this.settings = new SaladForkReportSettings();
     }
 }
 exports.SaladForkReportParameters = SaladForkReportParameters;
+class SaladForkReportSettings {
+    constructor() {
+        this.title = 'SaladFork Ops Report';
+        this.displayOutfitTags = false;
+    }
+}
+exports.SaladForkReportSettings = SaladForkReportSettings;
 
 
 /***/ }),
@@ -9413,13 +9426,14 @@ exports.SaladForkReportParameters = SaladForkReportParameters;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SaladForkReportParameters = exports.SaladForkReportGenerator = exports.SaladForkReport = void 0;
+exports.SaladForkReportSettings = exports.SaladForkReportParameters = exports.SaladForkReportGenerator = exports.SaladForkReport = void 0;
 const SaladForkReportGenerator_1 = __webpack_require__(/*! ./SaladForkReportGenerator */ "../topt-core/build/core/saladfork/SaladForkReportGenerator.js");
 Object.defineProperty(exports, "SaladForkReportGenerator", { enumerable: true, get: function () { return SaladForkReportGenerator_1.SaladForkReportGenerator; } });
 const SaladForkReport_1 = __webpack_require__(/*! ./SaladForkReport */ "../topt-core/build/core/saladfork/SaladForkReport.js");
 Object.defineProperty(exports, "SaladForkReport", { enumerable: true, get: function () { return SaladForkReport_1.SaladForkReport; } });
 const SaladForkReportParameters_1 = __webpack_require__(/*! ./SaladForkReportParameters */ "../topt-core/build/core/saladfork/SaladForkReportParameters.js");
 Object.defineProperty(exports, "SaladForkReportParameters", { enumerable: true, get: function () { return SaladForkReportParameters_1.SaladForkReportParameters; } });
+Object.defineProperty(exports, "SaladForkReportSettings", { enumerable: true, get: function () { return SaladForkReportParameters_1.SaladForkReportSettings; } });
 
 
 /***/ }),
@@ -73653,7 +73667,8 @@ const vm = new vue__WEBPACK_IMPORTED_MODULE_3__["default"]({
             ignoredPlayers: ""
         },
         saladfork: {
-            report: Loadable__WEBPACK_IMPORTED_MODULE_4__["Loadable"].idle()
+            report: Loadable__WEBPACK_IMPORTED_MODULE_4__["Loadable"].idle(),
+            settings: new tcore__WEBPACK_IMPORTED_MODULE_23__["SaladForkReportSettings"](),
         },
         deso: {
             report: Loadable__WEBPACK_IMPORTED_MODULE_4__["Loadable"].idle()
@@ -74626,17 +74641,17 @@ const vm = new vue__WEBPACK_IMPORTED_MODULE_3__["default"]({
         generateSaladForkReport: function () {
             return __awaiter(this, void 0, void 0, function* () {
                 const players = Array.from(this.core.stats.values());
-                console.log(`Making a SaladFork report with: ${players.map(p => p.name).join(',')}`);
                 const params = new tcore__WEBPACK_IMPORTED_MODULE_23__["SaladForkReportParameters"]();
                 params.players = players;
                 params.timeTracking = this.core.tracking;
                 params.captures = this.core.captures;
-                params.outfits = this.core.outfits,
-                    this.core.stats.forEach((player) => {
-                        if (!player.events.length)
-                            return;
-                        params.events.push(...player.events);
-                    });
+                params.outfits = this.core.outfits;
+                params.settings = this.saladfork.settings;
+                this.core.stats.forEach((player) => {
+                    if (!player.events.length)
+                        return;
+                    params.events.push(...player.events);
+                });
                 this.saladfork.report = Loadable__WEBPACK_IMPORTED_MODULE_4__["Loadable"].loading();
                 this.saladfork.report = Loadable__WEBPACK_IMPORTED_MODULE_4__["Loadable"].loaded(yield tcore__WEBPACK_IMPORTED_MODULE_23__["SaladForkReportGenerator"].generate(params));
                 this.view = 'saladfork';

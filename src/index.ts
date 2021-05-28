@@ -37,7 +37,7 @@ import "RelicImage";
 import Core, {
     ApiResponse,
     WinterReportGenerator, WinterReport, WinterReportParameters, WinterReportSettings,
-    SaladForkReportGenerator, SaladForkReportParameters, SaladForkReport,
+    SaladForkReportGenerator, SaladForkReportParameters, SaladForkReportSettings, SaladForkReport,
     IndividualReporter, Report, ReportParameters,
     OutfitReport, OutfitReportGenerator, OutfitReportSettings,
     FightReport, FightReportParameters, FightReportGenerator, FightReportEntry,
@@ -287,7 +287,8 @@ export const vm = new Vue({
         },
 
         saladfork: {
-            report: Loadable.idle() as Loading<SaladForkReport>
+            report: Loadable.idle() as Loading<SaladForkReport>,
+            settings: new SaladForkReportSettings() as SaladForkReportSettings,
         },
 
         deso: {
@@ -1364,13 +1365,12 @@ export const vm = new Vue({
         generateSaladForkReport: async function (): Promise<void> {
             const players: TrackedPlayer[] = Array.from(this.core.stats.values())
 
-            console.log(`Making a SaladFork report with: ${players.map(p => p.name).join(',')}`)
-
             const params: SaladForkReportParameters = new SaladForkReportParameters()
             params.players = players
             params.timeTracking = this.core.tracking
             params.captures = this.core.captures
-            params.outfits = this.core.outfits,
+            params.outfits = this.core.outfits
+            params.settings = this.saladfork.settings
 
             this.core.stats.forEach((player: TrackedPlayer) => {
                 if (!player.events.length) return
