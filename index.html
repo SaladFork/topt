@@ -215,9 +215,7 @@
 <body>
     <div class="container-fluid" id="app" style="height: 100%;" v-cloak>
 
-        <template v-if="settings.darkMode == true">
-            <link rel="stylesheet" href="./dark-theme.min.css">
-        </template>
+        <link rel="stylesheet" href="./dark-theme.min.css">
 
         <div v-if="view == 'setup' && relic.showUI != false" class="d-flex" style="flex-direction: column;">
             <div class="w-25 align-self-center pt-5">
@@ -318,11 +316,6 @@
                 <div class="btn-group w-100 mt-2">
                     <button type="button" class="btn btn-success" data-toggle="modal" data-target="#contact-modal">
                         Info/Contact
-                    </button>
-                    <button type="button" class="btn" :class="[ settings.darkMode == true ? 'btn-dark' : 'btn-light' ]"
-                            @click="settings.darkMode = !settings.darkMode">
-
-                        {{settings.darkMode == false ? 'Use dark mode' : 'Use light mode'}}
                     </button>
                 </div>
 
@@ -783,11 +776,6 @@
                     <div class="btn-group w-100 my-2">
                         <button type="button" class="btn btn-success" data-toggle="modal" data-target="#contact-modal">
                             Info/Contact
-                        </button>
-                        <button type="button" class="btn" :class="[ settings.darkMode == true ? 'btn-dark' : 'btn-light' ]"
-                                @click="settings.darkMode = !settings.darkMode">
-
-                            {{settings.darkMode == false ? 'Use dark mode' : 'Use light mode'}}
                         </button>
                     </div>
                 </div>
