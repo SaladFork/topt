@@ -9234,7 +9234,7 @@ class SaladForkReportGenerator {
     }
     static maxKills(parameters) {
         return {
-            name: 'MAXes Destroyed',
+            name: 'MAX Destroyed',
             entries: this.scoreEachPlayerBy(parameters, player => player.events.filter(event => event.type === 'kill' &&
                 (event.targetLoadoutID == '7' ||
                     event.targetLoadoutID == '14' ||
