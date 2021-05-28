@@ -8952,6 +8952,7 @@ const PsEvent_1 = __webpack_require__(/*! ../PsEvent */ "../topt-core/build/core
 const PsLoadout_1 = __webpack_require__(/*! ../census/PsLoadout */ "../topt-core/build/core/census/PsLoadout.js");
 const VehicleAPI_1 = __webpack_require__(/*! ../census/VehicleAPI */ "../topt-core/build/core/census/VehicleAPI.js");
 const WeaponAPI_1 = __webpack_require__(/*! ../census/WeaponAPI */ "../topt-core/build/core/census/WeaponAPI.js");
+const FacilityAPI_1 = __webpack_require__(/*! ../census/FacilityAPI */ "../topt-core/build/core/census/FacilityAPI.js");
 const StatMap_1 = __webpack_require__(/*! ../StatMap */ "../topt-core/build/core/StatMap.js");
 const log = Loggers_1.Logger.getLogger('SaladForkReportGenerator');
 class SaladForkReportGenerator {
@@ -8965,6 +8966,7 @@ class SaladForkReportGenerator {
                 ...parameters.players.filter(iter => iter.events.length > 0)
             ];
             report.summary.push(this.killStats(parameters));
+            report.summary.push(yield this.basesCaptured(parameters));
             // Bases Captured (+ Assisted)
             // Most picked-on enemies (by kills)
             // report.leaderboards.push(this.topVictims(parameters))
@@ -8973,6 +8975,7 @@ class SaladForkReportGenerator {
             report.leaderboards.Logistics.push(this.galaxySpawns(parameters)); // havent seen work yet
             report.leaderboards.Logistics.push(this.sundererSpawns(parameters));
             report.leaderboards.Logistics.push(this.routerSpawns(parameters));
+            report.leaderboards.Logistics.push(this.squadBeaconSpawns(parameters));
             report.leaderboards.Logistics.push(this.transportAssists(parameters));
             // Support
             report.leaderboards.Support = [];
@@ -9016,9 +9019,8 @@ class SaladForkReportGenerator {
             return loadout !== undefined && loadout.faction === faction;
         };
         return {
-            name: 'Kills',
+            name: `${allKillEvents.length} Total Kills`,
             entries: [
-                { name: 'Total Kills', value: allKillEvents.length },
                 {
                     name: 'TR Kills',
                     value: allKillEvents.filter(e => isKillOfFaction(e, 'TR')).length
@@ -9034,6 +9036,27 @@ class SaladForkReportGenerator {
                 }
             ]
         };
+    }
+    static basesCaptured(parameters) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const outfitIds = parameters.outfits.map(o => o.ID);
+            const captures = parameters.captures.filter(c => outfitIds.includes(c.outfitID));
+            const facilityIds = captures
+                .map(c => c.facilityID)
+                .filter((value, index, arr) => arr.indexOf(value) === index);
+            const facilities = yield FacilityAPI_1.FacilityAPI.getByIDs(facilityIds);
+            return {
+                name: `${captures.length} Bases Captured`,
+                entries: captures.map(capture => {
+                    var _a;
+                    return ({
+                        name: ((_a = facilities.find(f => f.ID === capture.facilityID)) === null || _a === void 0 ? void 0 : _a.name) || 'Unknown',
+                        value: parseInt(capture.previousFaction, 10),
+                        display: { 1: 'from VS', 2: 'from NC', 3: 'from TR', 4: 'from NS' }[capture.previousFaction] || ''
+                    });
+                })
+            };
+        });
     }
     static galaxySpawns(parameters) {
         return {
@@ -9051,6 +9074,12 @@ class SaladForkReportGenerator {
         return {
             name: 'Router Spawns',
             entries: this.sumOfStatsByPlayer(parameters, [PsEvent_1.PsEvent.routerSpawn])
+        };
+    }
+    static squadBeaconSpawns(parameters) {
+        return {
+            name: 'Beacon Spawns',
+            entries: this.sumOfStatsByPlayer(parameters, [PsEvent_1.PsEvent.squadSpawn])
         };
     }
     static transportAssists(parameters) {
@@ -9364,6 +9393,8 @@ class SaladForkReportParameters {
     constructor() {
         this.players = [];
         this.events = [];
+        this.captures = [];
+        this.outfits = [];
         this.timeTracking = { startTime: 0, endTime: 0, running: false };
     }
 }
@@ -74599,11 +74630,13 @@ const vm = new vue__WEBPACK_IMPORTED_MODULE_3__["default"]({
                 const params = new tcore__WEBPACK_IMPORTED_MODULE_23__["SaladForkReportParameters"]();
                 params.players = players;
                 params.timeTracking = this.core.tracking;
-                this.core.stats.forEach((player) => {
-                    if (!player.events.length)
-                        return;
-                    params.events.push(...player.events);
-                });
+                params.captures = this.core.captures;
+                params.outfits = this.core.outfits,
+                    this.core.stats.forEach((player) => {
+                        if (!player.events.length)
+                            return;
+                        params.events.push(...player.events);
+                    });
                 this.saladfork.report = Loadable__WEBPACK_IMPORTED_MODULE_4__["Loadable"].loading();
                 this.saladfork.report = Loadable__WEBPACK_IMPORTED_MODULE_4__["Loadable"].loaded(yield tcore__WEBPACK_IMPORTED_MODULE_23__["SaladForkReportGenerator"].generate(params));
                 this.view = 'saladfork';

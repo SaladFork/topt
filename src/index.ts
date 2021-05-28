@@ -1369,6 +1369,8 @@ export const vm = new Vue({
             const params: SaladForkReportParameters = new SaladForkReportParameters()
             params.players = players
             params.timeTracking = this.core.tracking
+            params.captures = this.core.captures
+            params.outfits = this.core.outfits,
 
             this.core.stats.forEach((player: TrackedPlayer) => {
                 if (!player.events.length) return
