@@ -1406,7 +1406,7 @@ class CoreSettings {
         /**
          * ID of the server to listen to login/logout and facility events
          */
-        this.serverID = "1";
+        this.serverID = "17";
         /**
          * If debug options will be shown
          */
@@ -4320,6 +4320,7 @@ PsEvent.ribbon = "291";
 PsEvent.routerKill = "1409";
 PsEvent.constructionSpawn = "1410";
 PsEvent.sundySpawn = "233";
+PsEvent.sundyRepair = "99";
 PsEvent.routerSpawn = "1410";
 PsEvent.beaconKill = "270";
 PsEvent.sundyDestroyed = "68";
@@ -4463,13 +4464,13 @@ exports.PsEvents = new Map([
             track: true,
             alsoIncrement: PsEvent.resupply
         }],
-    ["99", {
+    [PsEvent.sundyRepair, {
             name: "Sundy repair",
             types: ["engineer"],
             track: true,
-            alsoIncrement: undefined
+            alsoIncrement: PsEvent.vehicleRepair
         }],
-    remap("140", "99"),
+    remap("140", PsEvent.sundyRepair),
     [PsEvent.vehicleRepair, {
             name: "Vehicle repair",
             types: ["engineer"],
@@ -9001,8 +9002,8 @@ class SaladForkReportGenerator {
             report.leaderboards.PvP.push(yield this.grenadeKills(parameters));
             report.leaderboards.PvP.push(this.c4Kills(parameters));
             report.leaderboards.PvP.push(this.maxKills(parameters));
-            // Knife Kills
-            // Grenade Kills
+            report.leaderboards.PvP.push(this.routerKills(parameters));
+            report.leaderboards.PvP.push(this.beaconKills(parameters));
             // Misc
             report.leaderboards.Miscellaneous = [];
             report.leaderboards.Miscellaneous.push(this.topScore(parameters));
@@ -9033,7 +9034,7 @@ class SaladForkReportGenerator {
                     name: 'NC Kills',
                     value: allKillEvents.filter(e => isKillOfFaction(e, 'NC')).length
                 }
-            ]
+            ].filter(e => e.value)
         };
     }
     static basesTagged(parameters) {
@@ -9205,7 +9206,7 @@ class SaladForkReportGenerator {
     }
     static vehicleKills(parameters) {
         return {
-            name: 'Vehicle Kills',
+            name: 'Vehicles Destroyed',
             entries: this.scoreEachPlayerBy(parameters, player => player.events.reduce((sum, event) => {
                 if (event.type !== 'vehicle')
                     return sum;
@@ -9233,11 +9234,23 @@ class SaladForkReportGenerator {
     }
     static maxKills(parameters) {
         return {
-            name: 'MAX Kills',
+            name: 'MAXes Destroyed',
             entries: this.scoreEachPlayerBy(parameters, player => player.events.filter(event => event.type === 'kill' &&
                 (event.targetLoadoutID == '7' ||
                     event.targetLoadoutID == '14' ||
                     event.targetLoadoutID == '21')).length)
+        };
+    }
+    static routerKills(parameters) {
+        return {
+            name: 'Routers Destroyed',
+            entries: this.sumOfStatsByPlayer(parameters, [PsEvent_1.PsEvent.routerKill])
+        };
+    }
+    static beaconKills(parameters) {
+        return {
+            name: 'Beacons Destroyed',
+            entries: this.sumOfStatsByPlayer(parameters, [PsEvent_1.PsEvent.beaconKill])
         };
     }
     static lifeExpectancy(parameters) {
