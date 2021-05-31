@@ -9000,6 +9000,7 @@ class SaladForkReportGenerator {
             report.leaderboards.PvP.push(yield this.knifeKills(parameters));
             report.leaderboards.PvP.push(yield this.pistolKills(parameters));
             report.leaderboards.PvP.push(yield this.grenadeKills(parameters));
+            report.leaderboards.PvP.push(yield this.launcherKills(parameters));
             report.leaderboards.PvP.push(this.c4Kills(parameters));
             report.leaderboards.PvP.push(this.maxKills(parameters));
             report.leaderboards.PvP.push(this.routerKills(parameters));
@@ -9234,7 +9235,7 @@ class SaladForkReportGenerator {
     }
     static maxKills(parameters) {
         return {
-            name: 'MAXes Destroyed',
+            name: 'MAX Destroyed',
             entries: this.scoreEachPlayerBy(parameters, player => player.events.filter(event => event.type === 'kill' &&
                 (event.targetLoadoutID == '7' ||
                     event.targetLoadoutID == '14' ||
@@ -9309,6 +9310,14 @@ class SaladForkReportGenerator {
             name: 'Kills with C-4',
             entries: this.countOfKillsWithWeapons(parameters, c4Ids)
         };
+    }
+    static launcherKills(parameters) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return {
+                name: 'Kills with Launchers',
+                entries: yield this.countOfKillsWithWeaponType(parameters, 'Rocket Launcher')
+            };
+        });
     }
     static topScore(parameters) {
         return {
