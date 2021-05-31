@@ -4309,6 +4309,7 @@ PsEvent.squadRadarDetect = "354";
 PsEvent.roadkill = "26";
 PsEvent.transportAssists = "30";
 PsEvent.galaxySpawn = "201";
+PsEvent.squadVehicleSpawn = "355";
 PsEvent.concAssist = "550";
 PsEvent.squadConcAssist = "551";
 PsEvent.empAssist = "552";
@@ -4499,7 +4500,7 @@ exports.PsEvents = new Map([
             name: "Galaxy spawn bonus",
             types: ["logistics"],
             track: true,
-            alsoIncrement: PsEvent.squadSpawn
+            alsoIncrement: PsEvent.squadVehicleSpawn
         }],
     [PsEvent.sundySpawn, {
             name: "Sundy spawn",
@@ -4561,11 +4562,11 @@ exports.PsEvents = new Map([
             track: true,
             alsoIncrement: undefined
         }],
-    ["355", {
+    [PsEvent.squadVehicleSpawn, {
             name: "Squad vehicle spawn",
             types: ["logistics"],
             track: true,
-            alsoIncrement: undefined
+            alsoIncrement: PsEvent.squadSpawn
         }],
     [PsEvent.shieldRepair, {
             name: "Shield repair",
@@ -8975,7 +8976,7 @@ class SaladForkReportGenerator {
             // report.leaderboards.push(this.topVictims(parameters))
             // Logistics
             report.leaderboards.Logistics = [];
-            report.leaderboards.Logistics.push(this.squadBeaconSpawns(parameters));
+            report.leaderboards.Logistics.push(this.squadVehicleSpawns(parameters));
             report.leaderboards.Logistics.push(this.sundererSpawns(parameters));
             report.leaderboards.Logistics.push(this.routerSpawns(parameters));
             report.leaderboards.Logistics.push(this.transportAssists(parameters));
@@ -9078,10 +9079,10 @@ class SaladForkReportGenerator {
             entries: this.sumOfStatsByPlayer(parameters, [PsEvent_1.PsEvent.routerSpawn])
         };
     }
-    static squadBeaconSpawns(parameters) {
+    static squadVehicleSpawns(parameters) {
         return {
-            name: 'Galaxy/Beacon Spawns',
-            entries: this.sumOfStatsByPlayer(parameters, [PsEvent_1.PsEvent.squadSpawn])
+            name: 'Squad Vehicle Spawns',
+            entries: this.sumOfStatsByPlayer(parameters, [PsEvent_1.PsEvent.squadVehicleSpawn])
         };
     }
     static transportAssists(parameters) {
